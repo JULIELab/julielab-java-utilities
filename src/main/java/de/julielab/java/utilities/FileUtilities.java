@@ -36,7 +36,7 @@ public class FileUtilities {
 	 * @throws IOException
 	 *             If there is an error during reading.
 	 */
-	public static InputStream getInputStreamFromFile(File file) throws IOException {
+	public static BufferedInputStream getInputStreamFromFile(File file) throws IOException {
 		try {
 			InputStream is = new FileInputStream(file);
 			String lcfn = file.getName().toLowerCase();
@@ -59,7 +59,7 @@ public class FileUtilities {
 	 * @throws IOException
 	 *             If there is an error during stream creation.
 	 */
-	public static OutputStream getOutputStreamToFile(File file) throws IOException {
+	public static BufferedOutputStream getOutputStreamToFile(File file) throws IOException {
 		OutputStream os = new FileOutputStream(file);
 		String lcfn = file.getName().toLowerCase();
 		if (lcfn.contains(".gz") || lcfn.contains(".gzip"))
@@ -78,7 +78,7 @@ public class FileUtilities {
 	 * @throws IOException
 	 *             If opening the file fails.
 	 */
-	public static Reader getReaderFromFile(File file) throws IOException {
+	public static BufferedReader getReaderFromFile(File file) throws IOException {
 		return new BufferedReader(new InputStreamReader(getInputStreamFromFile(file), "UTF-8"));
 	}
 
@@ -92,7 +92,7 @@ public class FileUtilities {
 	 * @throws IOException
 	 *             If opening the file fails.
 	 */
-	public static Writer getWriterToFile(File file) throws IOException {
+	public static BufferedWriter getWriterToFile(File file) throws IOException {
 		return new BufferedWriter(new OutputStreamWriter(getOutputStreamToFile(file), "UTF-8"));
 	}
 }

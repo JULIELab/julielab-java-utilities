@@ -55,7 +55,7 @@ public class CLIInteractionUtilities {
 	 *             If reading the input fails.
 	 */
 	public static String readLineFromStdInWithMessage(String message, String defaultResponse) throws IOException {
-		System.out.println(message + "(" + defaultResponse + ")");
+		System.out.println(message + " (" + defaultResponse + ")");
 		String input = readLineFromStdIn();
 		if (input.trim().length() == 0)
 			return defaultResponse;

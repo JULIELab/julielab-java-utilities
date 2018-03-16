@@ -13,8 +13,18 @@ Feel free to add more generally useful libraries here!
 ### CLIInteractionUtilities.java
 * Helper methods to read from the command line
 * With a message to print or without
-* Restrited to boolean yes/no answers.
+* Restricted to boolean yes/no answers.
+### CompressionUtilities.java
+* '''NOTE''': requires the dependency org.rauschig:jarchivelib:0.7.1 to exist on the classpath. This dependency is not resolved transitively from this project.
+* has a method to extract archive files with automatic archive format determination
+### ConfigurationUtilities.java
+* '''NOTE''': requires the dependency org.apache.commons:commons-configuration2:2.2 to exist on the classpath. This dependency is not resolved transitively from this project.
+* Helper methods for the apache commons configuration 2 project
+* configuration parameter checking
+* configuration parameter path creation
+* configuration file reading
 ### FileUtilities.java
 * Helper methods to read or write files
-* Automatically handeles regular or gzipped files
-* Convention: A File instance with a name that ends with *.gz* or *.gzip* Is handeled like a gzipped file automatically, in reading and writing.
+* Automatically handles regular or gzipped files
+* Convention: A File instance with a name that ends with *.gz* or *.gzip* Is handled like a gzipped file automatically, in reading and writing.
+

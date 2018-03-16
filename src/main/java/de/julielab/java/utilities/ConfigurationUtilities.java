@@ -18,7 +18,9 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.joining;
 
 /**
- * Utilities for the work with commons configuration 2.
+ * Utilities for the work with commons configuration 2. Note that the dependency for the configuration 2 project
+ * is set with scope provided. Thus, the dependency will not automatically be introduced into a project
+ * depending on this project. This is done to keep transitive dependencies at a minimum.
  */
 public class ConfigurationUtilities {
     public static final String LS = System.getProperty("line.separator");

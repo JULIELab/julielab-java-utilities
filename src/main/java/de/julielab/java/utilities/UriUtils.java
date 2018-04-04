@@ -2,9 +2,7 @@ package de.julielab.java.utilities;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.zip.GZIPInputStream;
 
 public class UriUtils {

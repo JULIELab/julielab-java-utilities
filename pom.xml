@@ -33,12 +33,16 @@
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy-agent</artifactId>
             <version>1.7.9</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13-SNAPSHOT</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     <build>
@@ -59,19 +63,36 @@
             </resource>
         </resources>
         <plugins>
+            <!--<plugin>-->
+                <!--<groupId>org.apache.maven.plugins</groupId>-->
+                <!--<artifactId>maven-jar-plugin</artifactId>-->
+                <!--<version>3.0.2</version>-->
+                <!--<configuration>-->
+                    <!--<archive>-->
+                        <!--<manifestEntries>-->
+                            <!--<mode>development</mode>-->
+                            <!--<url>https://github.com/JULIELab/</url>-->
+                            <!--<Agent-Class>de.julielab.java.utilities.classpath.Agent</Agent-Class>-->
+                        <!--</manifestEntries>-->
+                    <!--</archive>-->
+                <!--</configuration>-->
+            <!--</plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.0.2</version>
-                <configuration>
-                    <archive>
-                        <manifestEntries>
-                            <mode>development</mode>
-                            <url>https://github.com/JULIELab/</url>
-                            <Agent-Class>de.julielab.java.utilities.classpath.Agent</Agent-Class>
-                        </manifestEntries>
-                    </archive>
-                </configuration>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.1</version>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

@@ -85,7 +85,7 @@ public class JarLoader {
 
     private static boolean isJavaVersionAbove8() {
         String version = System.getProperty("java.version");
-        if (version.startsWith("1")) {
+        if (version.startsWith("1.")) {
             // Version format up to Java 8, e.g. 1.7.0
             return false;
         } else {

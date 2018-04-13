@@ -1,14 +1,10 @@
 package de.julielab.java.utilities.classpath;
 
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.core.util.StatusPrinter;
 import de.julielab.java.utilities.IOStreamUtilities;
 import net.bytebuddy.agent.ByteBuddyAgent;
 import org.apache.commons.compress.utils.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.management.Agent;
-import sun.tools.jar.resources.jar;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,8 +22,8 @@ import java.util.zip.ZipFile;
  * located at {@link de.julielab.java.utilities.classpath.Agent}. The agent must be included in a JAR that
  * registers it by the Agent-Class property of its MANIFEST.MF file.
  * This class can either used inside the julielab-java-utilities JAR file directly, which has the Agent-Class
- * property set for its manifest. When building a fat JAR, containing this class, the fat JAR must
- * have the property itself.
+ * property set for its manifest. When building a fat JAR, e.g. with the Maven assembly or Maven shadow plugins,
+ * containing this class, the fat JAR must have the property itself.
  */
 public class JarLoader {
     private final static Logger log = LoggerFactory.getLogger(JarLoader.class);
@@ -56,7 +52,7 @@ public class JarLoader {
     /**
      * https://stackoverflow.com/questions/27187566/load-jar-dynamically-at-runtime
      * <p>
-     * WARNING: This only works until Java9. Beginning with Java9, the system classloader is not an URLClassLoader
+     * WARNING: This only works up to Java 8. Beginning with Java 9, the system classloader is not an URLClassLoader
      * any more.
      * Adds the supplied Java Archive library to java.class.path. This is benign
      * if the library is already loaded.

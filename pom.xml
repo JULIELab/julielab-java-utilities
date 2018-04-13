@@ -3,16 +3,10 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>julielab-java-utilities</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
     <name>julielab-java-utilities</name>
     <url>http://maven.apache.org</url>
     <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>3.8.1</version>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-configuration2</artifactId>
@@ -33,15 +27,17 @@
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy-agent</artifactId>
             <version>1.7.9</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.13-SNAPSHOT</version>
+            <version>4.12</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -63,20 +59,6 @@
             </resource>
         </resources>
         <plugins>
-            <!--<plugin>-->
-                <!--<groupId>org.apache.maven.plugins</groupId>-->
-                <!--<artifactId>maven-jar-plugin</artifactId>-->
-                <!--<version>3.0.2</version>-->
-                <!--<configuration>-->
-                    <!--<archive>-->
-                        <!--<manifestEntries>-->
-                            <!--<mode>development</mode>-->
-                            <!--<url>https://github.com/JULIELab/</url>-->
-                            <!--<Agent-Class>de.julielab.java.utilities.classpath.Agent</Agent-Class>-->
-                        <!--</manifestEntries>-->
-                    <!--</archive>-->
-                <!--</configuration>-->
-            <!--</plugin>-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -94,11 +76,22 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Agent-Class>de.julielab.java.utilities.classpath.Agent</Agent-Class>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     <parent>
         <groupId>de.julielab</groupId>
         <artifactId>julielab-parent</artifactId>
-        <version>2.0.1</version>
+        <version>2.1.2-SNAPSHOT</version>
     </parent>
 </project>

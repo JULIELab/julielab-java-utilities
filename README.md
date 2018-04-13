@@ -10,10 +10,6 @@ Feel free to add more generally useful libraries here!
 
 ## Classes Overview
 
-### Agent.java
-* Uses instrumentation to add JAR files to the classpath during runtime
-* Is used by the JarLoader class
-* Employed beginning from Java version 9
 ### CLIInteractionUtilities.java
 * Helper methods to read from the command line
 * With a message to print or without
@@ -32,10 +28,11 @@ Feel free to add more generally useful libraries here!
 * Automatically handles regular or gzipped files
 * Convention: A File instance with a name that ends with *.gz* or *.gzip* Is handled like a gzipped file automatically, in reading and writing.
 ### JarLoader.java
+* **NOTE** requires the dependency net.bytebuddy:byte-buddy-agent:1.7.9 to exist on the classpath. This dependency is not resolved transitively from this project.
 * Allows to load JAR files during runtime
 * Exploits the fact that the system class loader is an `URIClassLoader` until Java 8
 * Automatically detects Java version to pick the correct JAR loading strategy
-* Beginning with Java 9, uses the `java.lang.instrument` package and employs the Agent class (see above)
+* Beginning with Java 9, uses the `java.lang.instrument` package and employs the Agent class included in this project
   * Needs to determine the file path of the JAR containing the Agent class
   * This JAR needs to have a `META-INF/MANIFEST.MF` file with the entry `Agent-Class: de.julielab.java.utilities.classpath.Agent`
   * The `julielab-java-utilities` JAR is searched on the classpath for this purpose.

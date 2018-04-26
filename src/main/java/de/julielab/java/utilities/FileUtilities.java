@@ -117,6 +117,7 @@ public class FileUtilities {
      * @param target   The JAR file to add <code>source</code> to.
      * @throws IOException If adding the file fails.
      */
+    // TODO add this method to the README
     public static void addFileToJarOutputStream(File source, StringBuilder rootPath, JarOutputStream target) throws IOException {
         BufferedInputStream in = null;
         try {

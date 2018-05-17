@@ -37,7 +37,7 @@ public class CompressionUtilities {
         ArchiveStream archiveStream = archiver.stream(from);
         ArchiveEntry entry;
         String firstEntryName = null;
-        if ((entry = archiveStream.getNextEntry()) != null) {
+        while ((entry = archiveStream.getNextEntry()) != null && firstEntryName == null) {
             if (entry.isDirectory()) {
                 firstEntryName = entry.getName();
             }

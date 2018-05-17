@@ -3,6 +3,7 @@ package de.julielab.java.utilities;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -15,9 +16,9 @@ import static org.junit.Assert.assertEquals;
 public class CompressionUtilitiesTest {
 
     @BeforeClass
-    @After
+    @AfterClass
     public static void clean() throws IOException {
-        File to = new File("src/test/resources/");
+        File to = new File("src/test/resources/mockDir");
         if (to.exists())
             FileUtils.deleteDirectory(to);
     }
@@ -27,6 +28,6 @@ public class CompressionUtilitiesTest {
         File from = new File("src/test/resources/mockarchive.tgz");
         File to = new File("src/test/resources/");
         File extract = CompressionUtilities.extract(from, to, false);
-        assertEquals("mockDir", extract);
+        assertEquals("mockdir", extract.getName());
     }
 }

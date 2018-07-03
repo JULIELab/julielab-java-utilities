@@ -7,6 +7,7 @@ import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.configuration2.tree.ImmutableNode;
+import org.apache.commons.configuration2.tree.xpath.XPathExpressionEngine;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -61,12 +62,20 @@ public class ConfigurationUtilities {
                     + parameterNotFound.stream().collect(joining(LS)));
     }
 
+    /**
+     * Loads the Apache Commons Configuration2 {@link XMLConfiguration} from the given file. By default,
+     * the {@link XPathExpressionEngine} is set.
+     * @param configurationFile
+     * @return
+     * @throws ConfigurationException
+     */
     public static XMLConfiguration loadXmlConfiguration(File configurationFile) throws ConfigurationException {
         try {
             Parameters params = new Parameters();
             FileBasedConfigurationBuilder<XMLConfiguration> configBuilder =
                     new FileBasedConfigurationBuilder<>(XMLConfiguration.class).configure(params
                             .xml()
+                            .setExpressionEngine(new XPathExpressionEngine())
                             .setFile(configurationFile));
             return configBuilder.getConfiguration();
         } catch (org.apache.commons.configuration2.ex.ConfigurationException e) {
@@ -75,7 +84,9 @@ public class ConfigurationUtilities {
     }
 
     /**
-     * Convenience method for quick concatenation of hierarchical configuration keys.
+     * Convenience method for quick concatenation of hierarchical configuration keys. When using
+     * Apache Commons Configuration, the {@link org.apache.commons.configuration2.tree.DefaultExpressionEngine} uses
+     * dots as configuration path key separation values by default.
      *
      * @param keys Configuration keys to concatenate into a single hierarchical key.
      * @return The input keys joined with dots.

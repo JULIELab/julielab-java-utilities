@@ -18,7 +18,8 @@ public class UriUtilities {
 
     public static BufferedInputStream getInputStreamFromUri(URI uri) throws IOException {
         try {
-            return new BufferedInputStream(uri.getPath().endsWith(".gz") || uri.getPath().endsWith(".gzip") ?
+            String uriStr = uri.toString().toLowerCase();
+            return new BufferedInputStream(uriStr.endsWith(".gz") || uriStr.endsWith(".gzip") ?
                     new GZIPInputStream(uri.toURL().openStream()) :
                     uri.toURL().openStream());
         } catch (ZipException e) {

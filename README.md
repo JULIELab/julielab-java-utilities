@@ -23,10 +23,16 @@ Feel free to add more generally useful libraries here!
 * configuration parameter checking
 * configuration parameter path creation
 * configuration file reading
+### IOStreamUtilities
+* Method to get a UTF-8 encoded reader from an InputStream
+* Method to get a list of UTF-8 encoded lines from an InputStream
 ### FileUtilities.java
 * Helper methods to read or write files
 * Automatically handles regular or gzipped files
 * Convention: A File instance with a name that ends with *.gz* or *.gzip* Is handled like a gzipped file automatically, in reading and writing.
+* Method to create a JAR file from an array of given files
+* Method to add a file into an existing JAR
+* Method to find a (file) resource via file path, URI or on the classpath.
 ### JarLoader.java
 * **NOTE** requires the dependency `net.bytebuddy`:`byte-buddy-agent`:`1.7.9` to exist on the classpath. This dependency is not resolved transitively from this project.
 * Allows to load JAR files during runtime

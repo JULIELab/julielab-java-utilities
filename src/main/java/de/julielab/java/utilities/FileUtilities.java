@@ -12,6 +12,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
@@ -19,6 +21,8 @@ import java.util.jar.Manifest;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+
+import static de.julielab.java.utilities.UriUtilities.getInputStreamFromUri;
 
 /**
  * This class is a collection of useful file-related static methods. Refer to
@@ -117,7 +121,6 @@ public class FileUtilities {
      * @param target   The JAR file to add <code>source</code> to.
      * @throws IOException If adding the file fails.
      */
-    // TODO add this method to the README
     public static void addFileToJarOutputStream(File source, StringBuilder rootPath, JarOutputStream target) throws IOException {
         BufferedInputStream in = null;
         try {
@@ -154,5 +157,33 @@ public class FileUtilities {
             if (in != null)
                 in.close();
         }
+    }
+
+    /**
+     * Tries to find a resource by the given name. The name may be a path to a regular file, an URI or a classpath
+     * resource.
+     * @param name The resource name to find.
+     * @return The input stream from the found resource or <tt>null</tt> if the resource could not be found.
+     * @throws IOException If reading the resource fails.
+     */
+    public static InputStream findResource(String name) throws IOException {
+        InputStream is = null;
+        if (is == null) {
+            File file = new File(name);
+            if (file.exists())
+                is = getInputStreamFromFile(file);
+        }
+        if (is == null) {
+            try {
+                URI uri = new URI(name);
+                is = getInputStreamFromUri(uri);
+            } catch (URISyntaxException e) {
+                // nothing, obviously was not a valid URI
+            }
+        }
+        if (is == null) {
+            is = FileUtilities.class.getResourceAsStream(name.startsWith("/") ? name : "/" + name);
+        }
+        return is;
     }
 }

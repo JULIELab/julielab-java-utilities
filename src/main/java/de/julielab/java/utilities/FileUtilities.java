@@ -162,6 +162,7 @@ public class FileUtilities {
     /**
      * Tries to find a resource by the given name. The name may be a path to a regular file, an URI or a classpath
      * resource.
+     *
      * @param name The resource name to find.
      * @return The input stream from the found resource or <tt>null</tt> if the resource could not be found.
      * @throws IOException If reading the resource fails.
@@ -176,13 +177,17 @@ public class FileUtilities {
         if (is == null) {
             try {
                 URI uri = new URI(name);
-                is = getInputStreamFromUri(uri);
+                // If the URI is not absolute, the conversion to an URL for input stream opening will fail
+                if (uri.isAbsolute())
+                    is = getInputStreamFromUri(uri);
             } catch (URISyntaxException e) {
                 // nothing, obviously was not a valid URI
             }
         }
         if (is == null) {
             is = FileUtilities.class.getResourceAsStream(name.startsWith("/") ? name : "/" + name);
+            if (is != null && (name.toLowerCase().contains(".gz") || name.toLowerCase().contains(".gzip")))
+                is = new GZIPInputStream(is);
         }
         return is;
     }

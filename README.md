@@ -36,13 +36,18 @@ Feel free to add more generally useful libraries here!
 ### JarLoader.java
 * **NOTE** requires the dependency `net.bytebuddy`:`byte-buddy-agent`:`1.7.9` to exist on the classpath. This dependency is not resolved transitively from this project.
 * Allows to load JAR files during runtime
-* Exploits the fact that the system class loader is an `URIClassLoader` until Java 8
+* Exploits the fact that `the system class loader is an `URIClassLoader` until Java 8
 * Automatically detects Java version to pick the correct JAR loading strategy
 * Beginning with Java 9, uses the `java.lang.instrument` package and employs the Agent class included in this project
   * Needs to determine the file path of the JAR containing the Agent class
   * This JAR needs to have a `META-INF/MANIFEST.MF` file with the entry `Agent-Class: de.julielab.java.utilities.classpath.Agent`
   * The `julielab-java-utilities` JAR is searched on the classpath for this purpose.
   * In case of an uber JAR or fat JAR (e.g. through the Maven assembly or shadow plugins), the uber JAR itself is pointed to. The uber JAR must then have the manifest entry as explained above.
+### prerequisites.PrerequisiteChecker
+* Simple to use API to check parameter values for being not null or not empty. Automatically generates an error report if checks fail via an `IllegalArgumentException.
+* Example: `PrerequisiteChecker.checkThat().notNull(ob1, ob2).notEmpty(coll).withNames("ob1", "ob2", "coll").execute()`
+* Is **deactivated** by default: No checks will be performed unless the Java system property `de.julielab.prerequisitechecksenabled` is set to `true`.
+* Can be used with the `Supplier` interface. This allows to quickly check a path within a given object, e.g. `PrerequisiteChecker.checkThat().notNull(ob).notNull(() -> ob.prop1).notNull(() -> ob.prop1.prop2).withNames("Base object), "Property 1", "Property 2).execute()`
 ### UriUtilities.java
 * Get InputStreams and Readers from `java.net.URI`
 * Automatically handles regular or gzipped files, analogous to FileUtilities.java

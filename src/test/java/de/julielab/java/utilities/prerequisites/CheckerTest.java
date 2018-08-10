@@ -5,10 +5,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -81,5 +78,16 @@ public class CheckerTest {
     public void testSupplier3() {
         assertThatIllegalArgumentException().isThrownBy(() -> PrerequisiteChecker.checkThat().supplyNotEmpty(() -> new HashMap<String, List<String>>().get("nothing").subList(0, 0)).execute()).withMessageContaining("\"null\" caused a NullPointerException");
 
+    }
+
+    @Test
+    public void testAllNamesAtTheEnd() {
+        assertThatIllegalArgumentException().isThrownBy(() -> PrerequisiteChecker.checkThat().notNull(null).
+                notEmpty(Collections.emptySet()).
+                withNames("TheOb", "TheColl").execute())
+                .withMessageContaining("TheOb")
+                .withMessageContaining("is null")
+                .withMessageContaining("TheColl")
+                .withMessageContaining("is empty");
     }
 }

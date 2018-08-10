@@ -2,10 +2,15 @@ package de.julielab.java.utilities.prerequisites;
 
 import java.util.*;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.joining;
 
-
+/**
+ * This is a class meant for chaining together calls like <code>PrerequisiteChecker.checkThat().notNull(ob1, ob2).notEmpty(coll).withNames("ob1", "ob2", "coll").execute()</code>.
+ * In case that any of the checks fail on <code>execute()</code>, a message will be recorded for each failed check.
+ * Then, an <code>IllegalArgumentException</code> is thrown explaining what went wrong.
+ */
 public class PrerequisiteChecker {
 
     public static final String PREREQUISITE_CHECKS_ENABLED = "de.julielab.prerequisitechecksenabled";
@@ -17,7 +22,7 @@ public class PrerequisiteChecker {
     private Set<String> errorMessages;
     private List<ParameterChecker> checkers;
 
-    public PrerequisiteChecker() {
+    private PrerequisiteChecker() {
         enabled = Boolean.parseBoolean(System.getProperty(PREREQUISITE_CHECKS_ENABLED));
         errorMessages = new LinkedHashSet<>();
         checkers = new ArrayList<>();
@@ -41,8 +46,10 @@ public class PrerequisiteChecker {
     }
 
     /**
-     * Sets the names for the items of the last {@link #notNull(Object...)} or {@link #notEmpty(Collection[])}.
-     * There might be less arguments than items were previously given. In this case the remaining items will have no name.
+     * Sets the names for all items previously added to the checker, possibly in multiple calls. The number of names may
+     * lower or even higher than the number of given items. In the first case, the names will be assigned to the checked
+     * items from left to right in a continuous manner while the remaining items will receive <tt>null</tt> as their name.
+     * In the second case, all superfluous names will simply be ignored.
      *
      * @param names The names to give to the last list of items to check
      * @return This object for chaining.
@@ -51,7 +58,10 @@ public class PrerequisiteChecker {
         if (enabled) {
             if (checkers.isEmpty())
                 throw new IllegalStateException("No items have been added to the prerequisite checker, cannot assign names.");
-            checkers.get(checkers.size() - 1).withNames(names);
+            Deque<String> nameQueue = Arrays.stream(names).collect(Collectors.toCollection(ArrayDeque::new));
+            checkers.forEach(c -> {
+                c.withNames(nameQueue);
+            });
         }
         return this;
     }

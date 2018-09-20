@@ -18,7 +18,7 @@ Feel free to add more generally useful libraries here!
 * **NOTE**: requires the dependency `org.rauschig`:`jarchivelib`:`0.7.1` to exist on the classpath. This dependency is not resolved transitively from this project.
 * has a method to extract archive files with automatic archive format determination
 ### ConfigurationUtilities.java
-* **NOTE**: requires the dependency `org.apache.commons`:`commons-configuration2`:`2.2` to exist on the classpath. This dependency is not resolved transitively from this project.
+* **NOTE**: requires the dependency `org.apache.commons`:`commons-configuration2`:`2.2`, `commons-beanutils`:`commons-beanutils`:`1.9.3` and `commons-jxpath`:`commons-jxpath`:`1.3` to exist on the classpath. This dependency is not resolved transitively from this project.
 * Helper methods for the apache commons configuration 2 project
 * configuration parameter checking
 * configuration parameter path creation

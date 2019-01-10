@@ -2,7 +2,6 @@ package de.julielab.java.utilities.classpath;
 
 import de.julielab.java.utilities.IOStreamUtilities;
 import net.bytebuddy.agent.ByteBuddyAgent;
-import org.apache.commons.compress.utils.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,7 +106,10 @@ public class JarLoader {
         String[] classpathEntries = classpath.split(File.pathSeparator);
         if (jarLocation == null) {
             try {
-                nameOfLibraryJar = new String(IOUtils.toByteArray(JarLoader.class.getResourceAsStream("/jarname.txt")), StandardCharsets.UTF_8);
+                final Optional<String> any = IOStreamUtilities.getLinesFromInputStream(JarLoader.class.getResourceAsStream("/jarname.txt")).stream().filter(l -> !l.trim().isEmpty()).findAny();
+                if (!any.isPresent())
+                    throw new IOException();
+                nameOfLibraryJar = any.get();
             } catch (IOException e) {
                 log.warn("Loading of the JAR name for the julielab-java-utilities from the file jarname.txt that should" +
                         " be included in the very same JAR failed. It will still be tried to find the JAR from the classpath" +

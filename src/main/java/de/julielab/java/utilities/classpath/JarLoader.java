@@ -142,7 +142,7 @@ public class JarLoader {
                         .getLocation().toURI());
                 if (checkForAgentClassInJarManifest(jarFilePath)) {
                     jarLocation = jarFilePath;
-                    log.debug("Found that the class {} resides with in a JAR on the classpath: {}", Agent.class.getCanonicalName(), jarLocation);
+                    log.debug("Found that the class {} resides within a JAR on the classpath: {}", Agent.class.getCanonicalName(), jarLocation);
                 }
             } catch (URISyntaxException | SecurityException e) {
                 log.debug("Exception when trying to resolve the JAR location for the JarLoader Agent " +
@@ -156,7 +156,7 @@ public class JarLoader {
             File jarFilePath = new File(classpathEntries[0]);
             if (checkForAgentClassInJarManifest(jarFilePath)) {
                 jarLocation = jarFilePath;
-                log.debug("Found that the class {} resides with in the package JAR containing the whole program ('uber-JAR') at {}", Agent.class.getCanonicalName(), jarLocation);
+                log.debug("Found that the class {} resides within the package JAR containing the whole program ('uber-JAR') at {}", Agent.class.getCanonicalName(), jarLocation);
             }
         }
 

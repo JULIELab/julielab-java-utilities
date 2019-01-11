@@ -91,7 +91,7 @@ public class JarLoader {
 
     /**
      * Checks the classpath as given by the system property java.class.path for the JAR containing
-     * for this very library because it contains the Agent.
+     * this very library because it contains the Agent.
      */
     private synchronized static void findAgentJar() {
         File jarLocation = null;
@@ -110,6 +110,7 @@ public class JarLoader {
                 if (!any.isPresent())
                     throw new IOException();
                 nameOfLibraryJar = any.get();
+                log.debug("Found JAR name of the julielab-java-utilities through the jarname.txt file to be {}", nameOfLibraryJar);
             } catch (IOException e) {
                 log.warn("Loading of the JAR name for the julielab-java-utilities from the file jarname.txt that should" +
                         " be included in the very same JAR failed. It will still be tried to find the JAR from the classpath" +
@@ -118,14 +119,18 @@ public class JarLoader {
             final String finalLibName = nameOfLibraryJar;
             Optional<String> jarOpt = Stream.of(classpathEntries).filter(e -> e.contains(finalLibName)).findAny();
 
-            if (jarOpt.isPresent())
+            if (jarOpt.isPresent()) {
                 jarLocation = new File(jarOpt.get());
+                log.debug("Found location julielab-java-utilities JAR on the classpath as {}", jarLocation);
+            }
         }
         // For testing when working on the JarLoader itself.
         if (jarLocation == null) {
             jarLocation = new File("target/" + nameOfLibraryJar);
             if (!jarLocation.exists())
                 jarLocation = null;
+            else
+                log.debug("Found location julielab-java-utilities JAR in the target/ directory to be {}", jarLocation);
         }
 
         if (jarLocation == null) {
@@ -135,8 +140,10 @@ public class JarLoader {
                 File jarFilePath = new File(JarLoader.class.getProtectionDomain()
                         .getCodeSource()
                         .getLocation().toURI());
-                if (checkForAgentClassInJarManifest(jarFilePath))
-                    jarLocation = jarLocation;
+                if (checkForAgentClassInJarManifest(jarFilePath)) {
+                    jarLocation = jarFilePath;
+                    log.debug("Found that the class {} resides with in a JAR on the classpath: {}", Agent.class.getCanonicalName(), jarLocation);
+                }
             } catch (URISyntaxException | SecurityException e) {
                 log.debug("Exception when trying to resolve the JAR location for the JarLoader Agent " +
                         "using the protection domain.", e);
@@ -147,8 +154,10 @@ public class JarLoader {
             // julielab-java-utilities since they will be contained in the uber-JAR. Just try to use the JAR
             // itself
             File jarFilePath = new File(classpathEntries[0]);
-            if (checkForAgentClassInJarManifest(jarFilePath))
-                jarLocation = jarLocation;
+            if (checkForAgentClassInJarManifest(jarFilePath)) {
+                jarLocation = jarFilePath;
+                log.debug("Found that the class {} resides with in the package JAR containing the whole program ('uber-JAR') at {}", Agent.class.getCanonicalName(), jarLocation);
+            }
         }
 
         if (jarLocation != null && jarLocation.exists())

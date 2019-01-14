@@ -182,7 +182,7 @@ public class FileUtilities {
             }
         }
         if (is == null) {
-            log.debug("No file at path '{}' was found. Trying to parse as an URI.", name);
+            log.debug("No file at path '{}' was found. Trying to parse as an URI.", new File(name).getAbsolutePath());
             try {
                 URI uri = new URI(name);
                 // If the URI is not absolute, the conversion to an URL for input stream opening will fail
@@ -206,7 +206,7 @@ public class FileUtilities {
             }
         }
         if (log.isDebugEnabled() && is == null)
-            log.debug("The resource '{}' could not found as a file, URI or on the classpath. Returning null.", name);
+            log.debug("The resource '{}' could not be found as a file, URI or on the classpath. Returning null.", name);
         return is;
     }
 }

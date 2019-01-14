@@ -1,5 +1,8 @@
 package de.julielab.java.utilities;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -31,6 +34,7 @@ import static de.julielab.java.utilities.UriUtilities.getInputStreamFromUri;
  * @author faessler
  */
 public class FileUtilities {
+    private final static Logger log = LoggerFactory.getLogger(FileUtilities.class);
     /**
      * Returns an {@link InputStream} for <tt>file</tt>. Automatically wraps in
      * an {@link BufferedInputStream} and also in an {@link GZIPInputStream} if
@@ -170,25 +174,39 @@ public class FileUtilities {
     public static InputStream findResource(String name) throws IOException {
         InputStream is = null;
         if (is == null) {
+            log.debug("Trying to find resource '{}' as a file", name);
             File file = new File(name);
-            if (file.exists())
+            if (file.exists()) {
+                log.debug("Found file '{}'", file);
                 is = getInputStreamFromFile(file);
+            }
         }
         if (is == null) {
+            log.debug("No file at path '{}' was found. Trying to parse as an URI.", name);
             try {
                 URI uri = new URI(name);
                 // If the URI is not absolute, the conversion to an URL for input stream opening will fail
-                if (uri.isAbsolute())
+                if (uri.isAbsolute()) {
                     is = getInputStreamFromUri(uri);
+                    if (log.isDebugEnabled() && is != null)
+                        log.debug("Found resources at URI '{}'", uri.toString());
+                }
             } catch (URISyntaxException e) {
                 // nothing, obviously was not a valid URI
             }
         }
         if (is == null) {
+            log.debug("Did not find a resource at file or URI '{}', trying as resource on the classpath.", name);
             is = FileUtilities.class.getResourceAsStream(name.startsWith("/") ? name : "/" + name);
-            if (is != null && (name.toLowerCase().contains(".gz") || name.toLowerCase().contains(".gzip")))
+            if (log.isDebugEnabled() && is != null)
+                log.debug("Found classpath resource at '{}'", name);
+            if (is != null && (name.toLowerCase().contains(".gz") || name.toLowerCase().contains(".gzip"))) {
+                log.debug("Classpath resource '{}' ending indicates a GZIP resource, ungzipping is added", name);
                 is = new GZIPInputStream(is);
+            }
         }
+        if (log.isDebugEnabled() && is == null)
+            log.debug("The resource '{}' could not found as a file, URI or on the classpath. Returning null.", name);
         return is;
     }
 }

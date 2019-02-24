@@ -80,5 +80,20 @@ public class OffsetMap<V> extends TreeMap<Range<Integer>, V> {
 	public V put(Span span) {
 		return put(span.getOffsets(), (V) span);
 	}
+
+    public V getLargestOverlapping(Range<Integer> range) {
+        final NavigableMap<Range<Integer>, V> overlapping = getOverlapping(range);
+        Range<Integer> largestOverlap = null;
+        int largestLength = 0;
+        for (Range<Integer> key : overlapping.keySet()) {
+            final Range<Integer> intersection = key.intersectionWith(range);
+            int length = intersection.getMaximum() - intersection.getMinimum();
+            if (largestOverlap == null || largestLength < length) {
+                largestOverlap = key;
+                largestLength = length;
+            }
+        }
+        return largestOverlap != null ? overlapping.get(largestOverlap) : null;
+    }
 	
 }

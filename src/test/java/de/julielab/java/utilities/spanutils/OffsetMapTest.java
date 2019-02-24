@@ -8,7 +8,7 @@ import java.util.NavigableMap;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-
+import static org.assertj.core.api.Assertions.*;
 public class OffsetMapTest {
 
 	@Test
@@ -36,4 +36,14 @@ public class OffsetMapTest {
 				true);
 		assertEquals(1, subMap.size());
 	}
+
+	@Test
+	public void testLargestOverlapping() {
+        OffsetMap<String> map = new OffsetMap<>();
+        map.put(Range.between(0, 400), "test");
+        map.put(Range.between(400, 600), "test");
+        final String largestOverlapping = map.getLargestOverlapping(Range.between(0, 600));
+        assertThat(largestOverlapping).isNotNull();
+        assertThat(largestOverlapping).isEqualTo("test");
+    }
 }

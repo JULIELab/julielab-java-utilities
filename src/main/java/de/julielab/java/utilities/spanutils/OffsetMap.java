@@ -1,0 +1,70 @@
+package de.julielab.java.utilities.spanutils;
+
+import org.apache.commons.lang3.Range;
+
+import java.util.Map.Entry;
+import java.util.NavigableMap;
+import java.util.TreeMap;
+
+public class OffsetMap<V> extends TreeMap<Range<Integer>, V> {
+
+	private final static OffsetMap<?> EMPTY_OFFSET_MAP = new OffsetMap<>();
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8336911838492274123L;
+
+	public OffsetMap() {
+		super(new OffsetRangeComparator());
+	}
+
+	/**
+	 * Limits a map to entries within a range.
+	 * @param range The range containing the limits
+	 * @return A map of all entries whose keys lie between the minimum of range, inclusive,
+	 * and the maximum of range, also inclusive.
+	 */
+	public NavigableMap<Range<Integer>, V> restrictTo(Range<Integer> range) {
+		Range<Integer> begin = Range.between(range.getMinimum(), range.getMinimum());
+		Range<Integer> end = Range.between(range.getMaximum(), range.getMaximum());
+		return this.subMap(begin, true, end, true);
+	}
+	
+	public NavigableMap<Range<Integer>, V> getOverlapping(Range<Integer> range) {
+		if (this.isEmpty())
+			return emptyOffsetMap();
+		// Idea: get the first element within or less of the range and the last within or the first out of the given range. Then remove those entries that are out range.
+		Range<Integer> begin = Range.between(range.getMinimum(), range.getMinimum());
+		Range<Integer> end = Range.between(range.getMaximum(), range.getMaximum());
+		Entry<Range<Integer>, V> floor = this.floorEntry(begin);
+		Entry<Range<Integer>, V> ceiling = this.ceilingEntry(end);
+		if (floor == null)
+			floor = this.firstEntry();
+		if (ceiling == null)
+			ceiling = this.lastEntry();
+		NavigableMap<Range<Integer>,V> subMap = new TreeMap<>(this.subMap(floor.getKey(), true, ceiling.getKey(), true));
+
+		Range<Integer> firstKey = subMap.firstKey();
+		Range<Integer> lastKey = subMap.lastKey();
+		if (firstKey.getMaximum() <= range.getMinimum())
+			subMap.remove(firstKey);
+		// we have possible just removed the firstKey element which could have been the only element of the submap
+		if (subMap.isEmpty())
+			return emptyOffsetMap();
+		if (lastKey.getMinimum() >= range.getMaximum())
+			subMap.remove(lastKey);
+		return subMap;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static <V> OffsetMap<V> emptyOffsetMap(){
+		return (OffsetMap<V>) EMPTY_OFFSET_MAP;
+	}
+
+	@SuppressWarnings("unchecked")
+	public V put(Span span) {
+		return put(span.getOffsets(), (V) span);
+	}
+	
+}

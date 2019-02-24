@@ -48,6 +48,11 @@ Feel free to add more generally useful libraries here!
 * Example: `PrerequisiteChecker.checkThat().notNull(ob1, ob2).notEmpty(coll).withNames("ob1", "ob2", "coll").execute()`
 * Is **deactivated** by default: No checks will be performed unless the Java system property `de.julielab.prerequisitechecksenabled` is set to `true`.
 * Can be used with the `Supplier` interface. This allows to quickly check a path within a given object, e.g. `PrerequisiteChecker.checkThat().notNull(ob).notNull(() -> ob.prop1).notNull(() -> ob.prop1.prop2).withNames("Base object), "Property 1", "Property 2).execute()`
+### Span Utilities
+* Helper classes for objects that cover some kind of integer-valued span
+  * e.g. word spans, character spans, time spans
+* `de.julielab.java.utilities.spanutils.OffsetMap` maps integer ranges to arbitrary objects, e.g. text annotations. It returns a overlapping-range-restricted subset of itself on request and can return contained objects overlapping a given range.
+* `de.julielab.java.utilities.spanutils.OffsetSet` stores a set of range 
 ### UriUtilities.java
 * Get InputStreams and Readers from `java.net.URI`
 * Automatically handles regular or gzipped files, analogous to FileUtilities.java

@@ -30,7 +30,21 @@ public class OffsetMap<V> extends TreeMap<Range<Integer>, V> {
 		Range<Integer> end = Range.between(range.getMaximum(), range.getMaximum());
 		return this.subMap(begin, true, end, true);
 	}
-	
+
+    /**
+     * Limits a map to entries within a range.
+     * @param range The range containing the limits
+     * @return A map of all entries whose keys lie between the minimum of range, inclusive,
+     * and the maximum of range, also inclusive.
+     */
+    public NavigableMap<Range<Integer>, V> restrictTo(Span range) {
+        return restrictTo(range.getOffsets());
+    }
+
+	public NavigableMap<Range<Integer>, V> getOverlapping(Span range) {
+		return getOverlapping(range.getOffsets());
+	}
+
 	public NavigableMap<Range<Integer>, V> getOverlapping(Range<Integer> range) {
 		if (this.isEmpty())
 			return emptyOffsetMap();

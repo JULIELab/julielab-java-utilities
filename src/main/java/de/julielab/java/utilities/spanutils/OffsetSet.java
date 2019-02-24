@@ -29,4 +29,8 @@ public class OffsetSet extends TreeSet<Range<Integer>> {
 		return (range.isOverlappedBy(offsets))? range: this.higher(range);
 	}
 
+	public Range<Integer> locate(Span offsets) {
+        return locate(offsets.getOffsets());
+	}
+
 }

@@ -19,6 +19,10 @@ public class OffsetMap<V> extends TreeMap<Range<Integer>, V> {
 		super(new OffsetRangeComparator());
 	}
 
+	public OffsetMap(OffsetMap<? extends V> other) {
+		super(other);
+	}
+
 	/**
 	 * Limits a map to entries within a range.
 	 * @param range The range containing the limits

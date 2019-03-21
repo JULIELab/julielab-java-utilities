@@ -4,6 +4,7 @@ import org.apache.commons.lang3.Range;
 
 import java.util.Map.Entry;
 import java.util.NavigableMap;
+import java.util.SortedMap;
 import java.util.TreeMap;
 
 public class OffsetMap<V> extends TreeMap<Range<Integer>, V> {
@@ -19,7 +20,7 @@ public class OffsetMap<V> extends TreeMap<Range<Integer>, V> {
 		super(new OffsetRangeComparator());
 	}
 
-	public OffsetMap(OffsetMap<? extends V> other) {
+	public OffsetMap(SortedMap<Range<Integer>, ? extends V> other) {
 		super(other);
 	}
 

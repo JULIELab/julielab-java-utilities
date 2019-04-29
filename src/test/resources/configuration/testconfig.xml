@@ -1,0 +1,7 @@
+<root>
+    <level1>
+        <level2 myatt="value1" myatt2="value2">
+            level 2 content
+        </level2>
+    </level1>
+</root>

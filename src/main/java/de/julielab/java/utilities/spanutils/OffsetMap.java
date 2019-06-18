@@ -24,6 +24,11 @@ public class OffsetMap<V> extends TreeMap<Range<Integer>, V> {
 		super(other);
 	}
 
+	public OffsetMap(Iterable<? extends Span> items) {
+		this();
+		items.forEach(this::put);
+	}
+
 	/**
 	 * Limits a map to entries within a range.
 	 * @param range The range containing the limits

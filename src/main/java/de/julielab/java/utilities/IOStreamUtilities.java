@@ -52,7 +52,7 @@ public class IOStreamUtilities {
                 result.write(buffer, 0, length);
             }
 
-            return result.toString(UTF_8);
+            return result.toString("UTF-8");
         } finally {
             is.close();
         }

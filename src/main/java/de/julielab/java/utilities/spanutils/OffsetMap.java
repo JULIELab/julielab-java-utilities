@@ -91,13 +91,32 @@ public class OffsetMap<V> extends TreeMap<Range<Integer>, V> {
 		return put(span.getOffsets(), (V) span);
 	}
 
-    public V getLargestOverlapping(Range<Integer> range) {
+	/**
+	 * <p>Returns the first value in the map that intersects the given range and does not have a smaller intersection than following elements.</p>
+	 * @param range The range to check for intersections.
+	 * @return The first value with the largest intersection with the given range or null if there is no intersecting element.
+	 */
+    public V getFirstLargestIntersectionValue(Range<Integer> range) {
         final NavigableMap<Range<Integer>, V> overlapping = getOverlapping(range);
         Range<Integer> largestOverlap = null;
         int largestLength = 0;
         for (Range<Integer> key : overlapping.keySet()) {
             final Range<Integer> intersection = key.intersectionWith(range);
             int length = intersection.getMaximum() - intersection.getMinimum();
+            if (largestOverlap == null || largestLength < length) {
+                largestOverlap = key;
+                largestLength = length;
+            }
+        }
+        return largestOverlap != null ? overlapping.get(largestOverlap) : null;
+    }
+
+    public V getFirstLargestOverlappingValue(Range<Integer> range) {
+        final NavigableMap<Range<Integer>, V> overlapping = getOverlapping(range);
+        Range<Integer> largestOverlap = null;
+        int largestLength = 0;
+        for (Range<Integer> key : overlapping.keySet()) {
+            int length = key.getMaximum() - key.getMinimum();
             if (largestOverlap == null || largestLength < length) {
                 largestOverlap = key;
                 largestLength = length;

@@ -38,12 +38,23 @@ public class OffsetMapTest {
 	}
 
 	@Test
-	public void testLargestOverlapping() {
+	public void testLargestIntersection() {
         OffsetMap<String> map = new OffsetMap<>();
         map.put(Range.between(0, 400), "test");
         map.put(Range.between(400, 600), "test");
-        final String largestOverlapping = map.getLargestOverlapping(Range.between(0, 600));
+        final String largestOverlapping = map.getFirstLargestIntersectionValue(Range.between(0, 600));
         assertThat(largestOverlapping).isNotNull();
         assertThat(largestOverlapping).isEqualTo("test");
     }
+
+    @Test
+	public void testLargestOverlapping() {
+		OffsetMap<String> map = new OffsetMap<>();
+		map.put(Range.between(0, 11), "\"male mice\"");
+		map.put(Range.between(1, 5), "male");
+		map.put(Range.between(6, 10), "mice");
+
+        final String overlappingValue = map.getFirstLargestOverlappingValue(Range.between(1, 5));
+        assertThat(overlappingValue).isEqualTo("\"male mice\"");
+	}
 }

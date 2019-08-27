@@ -1,14 +1,14 @@
 package de.julielab.java.utilities;
 
-import org.rauschig.jarchivelib.ArchiveEntry;
-import org.rauschig.jarchivelib.ArchiveStream;
-import org.rauschig.jarchivelib.Archiver;
-import org.rauschig.jarchivelib.ArchiverFactory;
+import org.rauschig.jarchivelib.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Iterator;
+import java.util.stream.Stream;
 
 /**
  * Utility class to work with compressed files. Note that the dependency for the jarchivelib project
@@ -49,5 +49,39 @@ public class CompressionUtilities {
                 throw new IOException("Could not delete the archive at " + from.getAbsolutePath());
         }
         return firstEntryFile;
+    }
+
+    public static Iterator<InputStream> getArchiveEntryInputStreams(File archive) throws IOException {
+        final Archiver archiver = ArchiverFactory.createArchiver(archive);
+        final ArchiveStream stream = archiver.stream(archive);
+        return new Iterator<InputStream>() {
+            private ArchiveEntry currentEntry;
+            boolean exhausted = false;
+            @Override
+            public boolean hasNext() {
+                if (currentEntry == null && !exhausted) {
+                    try {
+                        currentEntry = stream.getNextEntry();
+                        while (currentEntry != null && currentEntry.isDirectory())
+                            currentEntry = stream.getNextEntry();
+                        if (currentEntry == null)
+                            exhausted = true;
+                    } catch (IOException e) {
+                        log.error("Could not get next archive entry", e);
+                    }
+                }
+                return !exhausted;
+            }
+
+            @Override
+            public InputStream next() {
+                if (hasNext()) {
+                    currentEntry = null;
+                    return stream;
+                }
+
+                return null;
+            }
+        };
     }
 }

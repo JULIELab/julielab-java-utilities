@@ -36,10 +36,15 @@ public class LocalFileCacheAccess<K, V> extends CacheAccess<K, V> {
     }
 
     @Override
+    public void commit() {
+        cacheService.commitCache(cacheFile);
+    }
+
+    @Override
     public boolean put(K key, V value) {
         if (!cacheService.isDbReadOnly(cacheFile)) {
             cacheService.getCache(cacheFile, cacheRegion, keySerializer, valueSerializer).put(key, value);
-            cacheService.commitCache(cacheFile);
+            //  cacheService.commitCache(cacheFile);
             return true;
         } else {
             log.debug("Could not write value to cache {} because it is read-only.", cacheFile);

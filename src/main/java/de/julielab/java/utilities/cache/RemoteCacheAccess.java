@@ -80,4 +80,17 @@ public class RemoteCacheAccess<K, V> extends CacheAccess<K, V> {
     public boolean isReadOnly() {
         return false;
     }
+
+    @Override
+    public void commit() {
+        try (Socket s = getSocket()) {
+            final ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
+            // Sending a null key will cause all caches to be comitted. If we should need the commit
+            // of individual caches in the future, that feature would need to be implemented because it is not
+            // possible currently.
+            writeDefaultInformation(CacheServer.METHOD_PUT, null, oos);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

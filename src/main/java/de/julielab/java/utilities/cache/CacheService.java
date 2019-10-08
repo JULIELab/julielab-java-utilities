@@ -42,6 +42,20 @@ public class CacheService {
 
     }
 
+    /**
+     * <p>This is the method to acquire an actual cache object.</p>
+     * <p>Calling this method results in the creation of or the opening of a concrete cache file. The file
+     * will be created in the directory given by {@link CacheConfiguration#getLocalCacheDir()} or the
+     * respective parameter when starting the cache server in case of a remote cache.</p>
+     *
+     * @param cacheId             An arbitrary name that names the resulting cache file.
+     * @param cacheRegion         An arbitrary name of a region in within the given cacheId.
+     * @param keySerializerName   One of {@link CacheAccess#STRING}, {@link CacheAccess#JAVA}, {@link CacheAccess#BYTEARRAY} or {@link CacheAccess#DOUBLEARRAY}.
+     * @param valueSerializerName One of {@link CacheAccess#STRING}, {@link CacheAccess#JAVA}, {@link CacheAccess#BYTEARRAY} or {@link CacheAccess#DOUBLEARRAY}.
+     * @param <K>                 The cache key type.
+     * @param <V>                 The cache value type.
+     * @return An object granting access to the requested cache.
+     */
     public <K, V> CacheAccess<K, V> getCacheAccess(String cacheId, String cacheRegion, String keySerializerName, String valueSerializerName) {
         switch (configuration.getCacheType()) {
             case LOCAL:
@@ -77,6 +91,10 @@ public class CacheService {
             log.debug("Cannot commit cache {} because it is read-only.", dbFile);
     }
 
+    public void commitAllCaches() {
+        dbs.values().forEach(db -> db.commit());
+    }
+
     private DB getFiledb(File cacheDir) {
         try {
             DB db = dbs.get(cacheDir.getCanonicalPath());
@@ -99,5 +117,5 @@ public class CacheService {
         }
     }
 
-    enum CacheType {LOCAL, REMOTE}
+    public enum CacheType {LOCAL, REMOTE}
 }

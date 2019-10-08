@@ -15,6 +15,7 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+
 public class CacheServer {
     public static final String METHOD_GET = "get";
     public static final String METHOD_PUT = "put";
@@ -31,6 +32,7 @@ public class CacheServer {
         this.cacheDir = cacheDir;
         this.host = host;
         this.port = port;
+        CacheService.initialize(new CacheConfiguration(CacheService.CacheType.REMOTE, null, host, port, false));
         executorService = Executors.newFixedThreadPool(numThreads);
     }
 
@@ -67,6 +69,7 @@ public class CacheServer {
 
         @Override
         public void run() {
+            final CacheService cacheService = CacheService.getInstance();
             try (ObjectInputStream ois = new ObjectInputStream(socket.getInputStream()); ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream())) {
                 try {
                     log.trace("Reading request data.");
@@ -76,28 +79,33 @@ public class CacheServer {
                     final String keySerializerName = ois.readUTF();
                     final String valueSerializerName = ois.readUTF();
                     final Object key = ois.readObject();
-                    Object value = null;
-                    if (method.equalsIgnoreCase(METHOD_PUT))
-                        value = ois.readObject();
 
-                    Serializer<?> keySerializer = CacheAccess.getSerializerByName(keySerializerName);
-                    Serializer<?> valueSerializer = CacheAccess.getSerializerByName(valueSerializerName);
-                    final CacheService cacheService = CacheService.getInstance();
-                    final File cacheFile = new File(cacheDir.getAbsolutePath(), cacheName);
-                    final HTreeMap cache = cacheService.getCache(cacheFile, cacheRegion, keySerializer, valueSerializer);
+                    // The key being null is the commit-signal
+                    if (key != null) {
+                        Object value = null;
+                        if (method.equalsIgnoreCase(METHOD_PUT))
+                            value = ois.readObject();
 
-                    if (method.equalsIgnoreCase(METHOD_GET)) {
-                        final Object o = cache.get(key);
-                        if (o != null)
-                            log.trace("Returning data for key '{}' from cache {}, {}.", key, cacheName, cacheRegion);
-                        else
-                            log.trace("No cached data available for key '{}' in cache {}, {}.", key, cacheName, cacheRegion);
-                        oos.writeObject(o);
-                    } else if (method.equalsIgnoreCase(METHOD_PUT)) {
-                        log.trace("Putting data for key '{}' into the cache {}, {}.", key, cacheName, cacheRegion);
-                        cache.put(key, value);
-                        cacheService.commitCache(cacheFile);
-                        oos.writeUTF("OK");
+                        Serializer<?> keySerializer = CacheAccess.getSerializerByName(keySerializerName);
+                        Serializer<?> valueSerializer = CacheAccess.getSerializerByName(valueSerializerName);
+                        final File cacheFile = new File(cacheDir.getAbsolutePath(), cacheName);
+                        final HTreeMap cache = cacheService.getCache(cacheFile, cacheRegion, keySerializer, valueSerializer);
+
+                        if (method.equalsIgnoreCase(METHOD_GET)) {
+                            final Object o = cache.get(key);
+                            if (o != null)
+                                log.trace("Returning data for key '{}' from cache {}, {}.", key, cacheName, cacheRegion);
+                            else
+                                log.trace("No cached data available for key '{}' in cache {}, {}.", key, cacheName, cacheRegion);
+                            oos.writeObject(o);
+                        } else if (method.equalsIgnoreCase(METHOD_PUT)) {
+                            log.trace("Putting data for key '{}' into the cache {}, {}.", key, cacheName, cacheRegion);
+                            cache.put(key, value);
+                            oos.writeUTF("OK");
+                        }
+                    } else {
+                        // This is a commit request; we can currently only commit all caches at once.
+                        CacheService.getInstance().commitAllCaches();
                     }
                 } catch (Throwable e) {
                     e.printStackTrace();
@@ -114,6 +122,7 @@ public class CacheServer {
                 e.printStackTrace();
             } finally {
                 try {
+                    cacheService.commitAllCaches();
                     socket.close();
                 } catch (IOException e) {
                     e.printStackTrace();

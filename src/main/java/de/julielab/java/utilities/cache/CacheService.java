@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.management.ManagementFactory;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -19,20 +18,32 @@ import static de.julielab.java.utilities.cache.CacheService.CacheType.LOCAL;
 
 public class CacheService {
     private final static Logger log = LoggerFactory.getLogger(CacheService.class);
+    /**
+     * <p>Java system property name to enable or disable caching. No value is interpreted as 'true'.</p>
+     * <p>This property can be used to disable caching. When set to 'false', all methods returning an
+     * instance of {@link CacheAccess} will return the implementation {@link NoOpCacheAccess}. This
+     * implementation caches nothing and always returns null for {@link CacheAccess#get(Object)}.</p>
+     * <p>If caching is disabled, the call to {@link #initialize(CacheConfiguration)} is no longer
+     * necessary.</p>
+     */
+    public static final String CACHING_ENABLED_PROP = "de.julielab.java.utilities.cache.enabled";
     private static CacheService service;
-    private final String thisJvmName;
     private Map<String, DB> dbs = new HashMap<>();
     private Set<String> readOnly = new HashSet<>();
     private CacheConfiguration configuration;
 
     private CacheService(CacheConfiguration configuration) {
         this.configuration = configuration;
-        thisJvmName = ManagementFactory.getRuntimeMXBean().getName();
     }
 
     public static CacheService getInstance() {
-        if (service == null)
+        boolean cachingEnabled = Boolean.parseBoolean(System.getProperty(CACHING_ENABLED_PROP));
+        if (cachingEnabled && service == null)
             throw new IllegalStateException("Call 'initialize' before acquiring an instance of the CacheService.");
+        else if (!cachingEnabled) {
+            service = new CacheService(null);
+            return service;
+        }
         return service;
     }
 
@@ -57,6 +68,8 @@ public class CacheService {
      * @return An object granting access to the requested cache.
      */
     public <K, V> CacheAccess<K, V> getCacheAccess(String cacheId, String cacheRegion, String keySerializerName, String valueSerializerName) {
+        if (!Boolean.parseBoolean(System.getProperty(CACHING_ENABLED_PROP)))
+            return new NoOpCacheAccess<>(cacheId, cacheRegion);
         switch (configuration.getCacheType()) {
             case LOCAL:
                 return new LocalFileCacheAccess<>(cacheId, cacheRegion, keySerializerName, valueSerializerName, configuration.getLocalCacheDir());

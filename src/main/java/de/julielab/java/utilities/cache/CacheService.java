@@ -37,7 +37,8 @@ public class CacheService {
     }
 
     public static CacheService getInstance() {
-        boolean cachingEnabled = Boolean.parseBoolean(System.getProperty(CACHING_ENABLED_PROP));
+        String propertyValue = System.getProperty(CACHING_ENABLED_PROP);
+        boolean cachingEnabled = propertyValue == null || Boolean.parseBoolean(propertyValue);
         if (cachingEnabled && service == null)
             throw new IllegalStateException("Call 'initialize' before acquiring an instance of the CacheService.");
         else if (!cachingEnabled) {
@@ -68,7 +69,8 @@ public class CacheService {
      * @return An object granting access to the requested cache.
      */
     public <K, V> CacheAccess<K, V> getCacheAccess(String cacheId, String cacheRegion, String keySerializerName, String valueSerializerName) {
-        if (!Boolean.parseBoolean(System.getProperty(CACHING_ENABLED_PROP)))
+        String propertyValue = System.getProperty(CACHING_ENABLED_PROP);
+        if (propertyValue != null && !Boolean.parseBoolean(propertyValue))
             return new NoOpCacheAccess<>(cacheId, cacheRegion);
         switch (configuration.getCacheType()) {
             case LOCAL:

@@ -3,25 +3,14 @@ package de.julielab.java.utilities;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
-import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -83,7 +72,7 @@ public class FileUtilities {
      * @throws IOException If opening the file fails.
      */
     public static BufferedReader getReaderFromFile(File file) throws IOException {
-        return new BufferedReader(new InputStreamReader(getInputStreamFromFile(file), "UTF-8"));
+        return new BufferedReader(new InputStreamReader(getInputStreamFromFile(file), StandardCharsets.UTF_8));
     }
 
     /**
@@ -95,7 +84,7 @@ public class FileUtilities {
      * @throws IOException If opening the file fails.
      */
     public static BufferedWriter getWriterToFile(File file) throws IOException {
-        return new BufferedWriter(new OutputStreamWriter(getOutputStreamToFile(file), "UTF-8"));
+        return new BufferedWriter(new OutputStreamWriter(getOutputStreamToFile(file), StandardCharsets.UTF_8));
     }
 
     /**
@@ -174,15 +163,15 @@ public class FileUtilities {
     public static InputStream findResource(String name) throws IOException {
         InputStream is = null;
         if (is == null) {
-            log.debug("Trying to find resource '{}' as a file", name);
+            log.trace("Trying to find resource '{}' as a file", name);
             File file = new File(name);
             if (file.exists()) {
-                log.debug("Found file '{}'", file);
+                log.trace("Found file '{}'", file);
                 is = getInputStreamFromFile(file);
             }
         }
         if (is == null) {
-            log.debug("No file at path '{}' was found. Trying to parse as an URI.", new File(name).getAbsolutePath());
+            log.trace("No file at path '{}' was found. Trying to parse as an URI.", new File(name).getAbsolutePath());
             try {
                 URI uri = new URI(name);
                 // If the URI is not absolute, the conversion to an URL for input stream opening will fail
@@ -196,17 +185,17 @@ public class FileUtilities {
             }
         }
         if (is == null) {
-            log.debug("Did not find a resource at file or URI '{}', trying as resource on the classpath.", name);
+            log.trace("Did not find a resource at file or URI '{}', trying as resource on the classpath.", name);
             is = FileUtilities.class.getResourceAsStream(name.startsWith("/") ? name : "/" + name);
-            if (log.isDebugEnabled() && is != null)
-                log.debug("Found classpath resource at '{}'", name);
+            if (log.isTraceEnabled() && is != null)
+                log.trace("Found classpath resource at '{}'", name);
             if (is != null && (name.toLowerCase().contains(".gz") || name.toLowerCase().contains(".gzip"))) {
-                log.debug("Classpath resource '{}' ending indicates a GZIP resource, ungzipping is added", name);
+                log.trace("Classpath resource '{}' ending indicates a GZIP resource, ungzipping is added", name);
                 is = new GZIPInputStream(is);
             }
         }
-        if (log.isDebugEnabled() && is == null)
-            log.debug("The resource '{}' could not be found as a file, URI or on the classpath. Returning null.", name);
+        if (log.isTraceEnabled() && is == null)
+            log.trace("The resource '{}' could not be found as a file, URI or on the classpath. Returning null.", name);
         return is;
     }
 }

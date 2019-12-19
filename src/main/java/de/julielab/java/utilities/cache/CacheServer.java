@@ -40,7 +40,7 @@ public class CacheServer {
         final File cacheDir = new File(args[0]);
         final String host = args[1];
         final int port = Integer.valueOf(args[2]);
-        final int numThreads = Integer.valueOf(args[0]);
+        final int numThreads = Integer.valueOf(args[3]);
         log.info("Starting logger with cacheDir {}, host {}, port {} and the number of threads {}", cacheDir, host, port, numThreads);
         final CacheServer cacheServer = new CacheServer(cacheDir, host, port, numThreads);
         cacheServer.run();

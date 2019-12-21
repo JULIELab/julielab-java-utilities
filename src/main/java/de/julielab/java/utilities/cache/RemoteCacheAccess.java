@@ -16,6 +16,9 @@ public class RemoteCacheAccess<K, V> extends CacheAccess<K, V> {
     private final String valueSerializer;
     private final String host;
     private final int port;
+    private ObjectOutputStream oos;
+    private ObjectInputStream ois;
+    private boolean connectionOpen = false;
 
     public RemoteCacheAccess(String cacheId, String cacheRegion, String keySerializer, String valueSerializer, String host, int port) {
         super(cacheId, cacheRegion);
@@ -23,6 +26,18 @@ public class RemoteCacheAccess<K, V> extends CacheAccess<K, V> {
         this.valueSerializer = valueSerializer;
         this.host = host;
         this.port = port;
+    }
+
+    public void establishConnection() {
+        try {
+            Socket s = getSocket();
+            oos = new ObjectOutputStream(s.getOutputStream());
+            ois = new ObjectInputStream(s.getInputStream());
+            connectionOpen = true;
+        } catch (IOException e) {
+            throw new IllegalArgumentException(e);
+        }
+
     }
 
     private Socket getSocket() {
@@ -36,12 +51,15 @@ public class RemoteCacheAccess<K, V> extends CacheAccess<K, V> {
 
     @Override
     public V get(K key) {
-        try (Socket s = getSocket()) {
-            final ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
+        if (!connectionOpen)
+            establishConnection();
+        try {
             writeDefaultInformation(CacheServer.METHOD_GET, key, oos);
-            final ObjectInputStream ois = new ObjectInputStream(s.getInputStream());
             return (V) ois.readObject();
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (IOException e) {
+            connectionOpen = false;
+            throw new IllegalStateException(e);
+        } catch (ClassNotFoundException e) {
             throw new IllegalStateException(e);
         }
     }
@@ -57,11 +75,11 @@ public class RemoteCacheAccess<K, V> extends CacheAccess<K, V> {
 
     @Override
     public boolean put(K key, V value) {
-        try (Socket s = getSocket()) {
-            final ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
+        if (!connectionOpen)
+            establishConnection();
+        try {
             writeDefaultInformation(CacheServer.METHOD_PUT, key, oos);
             oos.writeObject(value);
-            final ObjectInputStream ois = new ObjectInputStream(s.getInputStream());
             final String response = ois.readUTF();
             if (response.equalsIgnoreCase(CacheServer.RESPONSE_FAILURE)) {
                 Exception e = (Exception) ois.readObject();
@@ -69,6 +87,7 @@ public class RemoteCacheAccess<K, V> extends CacheAccess<K, V> {
             }
             return response.equals(CacheServer.RESPONSE_OK);
         } catch (IOException e) {
+            connectionOpen = false;
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
@@ -83,13 +102,18 @@ public class RemoteCacheAccess<K, V> extends CacheAccess<K, V> {
 
     @Override
     public void commit() {
-        try (Socket s = getSocket()) {
-            final ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
+        if (!connectionOpen)
+            establishConnection();
+        try {
             // Sending a null key will cause all caches to be comitted. If we should need the commit
             // of individual caches in the future, that feature would need to be implemented because it is not
             // possible currently.
             writeDefaultInformation(CacheServer.METHOD_PUT, null, oos);
+            oos.close();
+            ois.close();
+            connectionOpen = false;
         } catch (IOException e) {
+            connectionOpen = false;
             e.printStackTrace();
         }
     }

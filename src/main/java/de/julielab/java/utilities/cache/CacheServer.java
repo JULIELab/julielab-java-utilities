@@ -26,6 +26,7 @@ public class CacheServer {
     private String host;
     private int port;
     private ExecutorService executorService;
+    private Thread backgroundThread;
 
 
     public CacheServer(File cacheDir, String host, int port, int numThreads) {
@@ -34,6 +35,8 @@ public class CacheServer {
         this.port = port;
         CacheService.initialize(new CacheConfiguration(CacheService.CacheType.REMOTE, null, host, port, false));
         executorService = Executors.newFixedThreadPool(numThreads);
+        if (!cacheDir.exists())
+            cacheDir.mkdirs();
     }
 
     public static void main(String[] args) throws IOException {
@@ -46,18 +49,52 @@ public class CacheServer {
         cacheServer.run();
     }
 
-    private void run() throws IOException {
+    public void run() throws IOException {
         final ServerSocket serverSocket = new ServerSocket(port, 1000, InetAddress.getByName(host));
         try {
             log.info("CacheServer ready for requests.");
             while (true) {
-                log.debug("Waiting for request.");
                 final Socket socket = serverSocket.accept();
+                log.debug("Handling new incoming connection");
                 executorService.submit(new RequestServer(socket));
             }
         } finally {
             serverSocket.close();
         }
+    }
+
+    public void runInBackground() {
+        if (backgroundThread == null) {
+            backgroundThread = new Thread() {
+                @Override
+                public void interrupt() {
+                    super.interrupt();
+                    log.trace("Terminating background cache server thread.");
+                }
+
+                @Override
+                public void run() {
+                    try {
+                        CacheServer.this.run();
+                    } catch (IOException e) {
+                        new RuntimeException(e);
+                    }
+                }
+            };
+
+            log.debug("Starting background thread for caching server");
+            backgroundThread.start();
+        } else {
+            throw new IllegalStateException("Background thread for caching server is already running.");
+        }
+    }
+
+    public void shutdown() {
+        log.info("Shutting down cache server.");
+        CacheService.getInstance().commitAllCaches();
+        if (backgroundThread != null)
+            backgroundThread.interrupt();
+        executorService.shutdown();
     }
 
     private class RequestServer extends Thread {
@@ -71,50 +108,55 @@ public class CacheServer {
         public void run() {
             final CacheService cacheService = CacheService.getInstance();
             try (ObjectInputStream ois = new ObjectInputStream(socket.getInputStream()); ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream())) {
-                try {
-                    log.trace("Reading request data.");
-                    final String method = ois.readUTF();
-                    final String cacheName = ois.readUTF();
-                    final String cacheRegion = ois.readUTF();
-                    final String keySerializerName = ois.readUTF();
-                    final String valueSerializerName = ois.readUTF();
-                    final Object key = ois.readObject();
+                while (true) {
+                    try {
+                        log.trace("Reading request data.");
+                        final String method = ois.readUTF();
+                        final String cacheName = ois.readUTF();
+                        final String cacheRegion = ois.readUTF();
+                        final String keySerializerName = ois.readUTF();
+                        final String valueSerializerName = ois.readUTF();
+                        final Object key = ois.readObject();
 
-                    // The key being null is the commit-signal
-                    if (key != null) {
-                        Object value = null;
-                        if (method.equalsIgnoreCase(METHOD_PUT))
-                            value = ois.readObject();
+                        // The key being null is the commit-signal
+                        if (key != null) {
+                            Object value = null;
+                            if (method.equalsIgnoreCase(METHOD_PUT))
+                                value = ois.readObject();
 
-                        Serializer<?> keySerializer = CacheAccess.getSerializerByName(keySerializerName);
-                        Serializer<?> valueSerializer = CacheAccess.getSerializerByName(valueSerializerName);
-                        final File cacheFile = new File(cacheDir.getAbsolutePath(), cacheName);
-                        final HTreeMap cache = cacheService.getCache(cacheFile, cacheRegion, keySerializer, valueSerializer);
+                            Serializer<?> keySerializer = CacheAccess.getSerializerByName(keySerializerName);
+                            Serializer<?> valueSerializer = CacheAccess.getSerializerByName(valueSerializerName);
+                            final File cacheFile = new File(cacheDir.getAbsolutePath(), cacheName);
+                            final HTreeMap cache = cacheService.getCache(cacheFile, cacheRegion, keySerializer, valueSerializer);
 
-                        if (method.equalsIgnoreCase(METHOD_GET)) {
-                            final Object o = cache.get(key);
-                            if (o != null)
-                                log.trace("Returning data for key '{}' from cache {}, {}.", key, cacheName, cacheRegion);
-                            else
-                                log.trace("No cached data available for key '{}' in cache {}, {}.", key, cacheName, cacheRegion);
-                            oos.writeObject(o);
-                        } else if (method.equalsIgnoreCase(METHOD_PUT)) {
-                            log.trace("Putting data for key '{}' into the cache {}, {}.", key, cacheName, cacheRegion);
-                            cache.put(key, value);
-                            oos.writeUTF("OK");
+                            if (method.equalsIgnoreCase(METHOD_GET)) {
+                                final Object o = cache.get(key);
+                                if (o != null)
+                                    log.trace("Returning data for key '{}' from cache {}, {}.", key, cacheName, cacheRegion);
+                                else
+                                    log.trace("No cached data available for key '{}' in cache {}, {}.", key, cacheName, cacheRegion);
+                                oos.writeObject(o);
+                                oos.flush();
+                            } else if (method.equalsIgnoreCase(METHOD_PUT)) {
+                                log.trace("Putting data for key '{}' into the cache {}, {}.", key, cacheName, cacheRegion);
+                                cache.put(key, value);
+                                log.trace("Sending OK response");
+                                oos.writeUTF("OK");
+                                oos.flush();
+                            }
+                        } else {
+                            // This is a commit request; we can currently only commit all caches at once.
+                            CacheService.getInstance().commitAllCaches();
                         }
-                    } else {
-                        // This is a commit request; we can currently only commit all caches at once.
-                        CacheService.getInstance().commitAllCaches();
-                    }
-                } catch (Throwable e) {
-                    e.printStackTrace();
-                    if (oos != null) {
-                        try {
-                            oos.writeUTF(RESPONSE_FAILURE);
-                            oos.writeObject(e);
-                        } catch (IOException e1) {
-                            e1.printStackTrace();
+                    } catch (Throwable e) {
+                        e.printStackTrace();
+                        if (oos != null) {
+                            try {
+                                oos.writeUTF(RESPONSE_FAILURE);
+                                oos.writeObject(e);
+                            } catch (IOException e1) {
+                                e1.printStackTrace();
+                            }
                         }
                     }
                 }

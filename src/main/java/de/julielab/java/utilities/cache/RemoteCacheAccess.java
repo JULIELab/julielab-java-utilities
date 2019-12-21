@@ -1,6 +1,8 @@
 package de.julielab.java.utilities.cache;
 
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,13 +21,19 @@ public class RemoteCacheAccess<K, V> extends CacheAccess<K, V> {
     private ObjectOutputStream oos;
     private ObjectInputStream ois;
     private boolean connectionOpen = false;
+    private Cache<K, V> memCache;
 
     public RemoteCacheAccess(String cacheId, String cacheRegion, String keySerializer, String valueSerializer, String host, int port) {
+        this(cacheId, cacheRegion, keySerializer, valueSerializer, host, port, 100);
+    }
+
+    public RemoteCacheAccess(String cacheId, String cacheRegion, String keySerializer, String valueSerializer, String host, int port, int memCacheSize) {
         super(cacheId, cacheRegion);
         this.keySerializer = keySerializer;
         this.valueSerializer = valueSerializer;
         this.host = host;
         this.port = port;
+        memCache = CacheBuilder.newBuilder().maximumSize(memCacheSize).build();
     }
 
     public void establishConnection() {
@@ -51,17 +59,22 @@ public class RemoteCacheAccess<K, V> extends CacheAccess<K, V> {
 
     @Override
     public V get(K key) {
-        if (!connectionOpen)
-            establishConnection();
-        try {
-            writeDefaultInformation(CacheServer.METHOD_GET, key, oos);
-            return (V) ois.readObject();
-        } catch (IOException e) {
-            connectionOpen = false;
-            throw new IllegalStateException(e);
-        } catch (ClassNotFoundException e) {
-            throw new IllegalStateException(e);
+        V value = memCache.getIfPresent(key);
+        if (value == null) {
+            if (!connectionOpen)
+                establishConnection();
+            try {
+                writeDefaultInformation(CacheServer.METHOD_GET, key, oos);
+                value = (V) ois.readObject();
+                memCache.put(key, value);
+            } catch (IOException e) {
+                connectionOpen = false;
+                throw new IllegalStateException(e);
+            } catch (ClassNotFoundException e) {
+                throw new IllegalStateException(e);
+            }
         }
+        return value;
     }
 
     private void writeDefaultInformation(String method, K key, ObjectOutputStream oos) throws IOException {

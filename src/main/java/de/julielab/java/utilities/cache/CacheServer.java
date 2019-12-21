@@ -149,15 +149,19 @@ public class CacheServer {
                             CacheService.getInstance().commitAllCaches();
                         }
                     } catch (Throwable e) {
-                        e.printStackTrace();
+                        log.error("Exception occurred. Sending an error message to the client and terminating the connection.", e);
                         if (oos != null) {
                             try {
                                 oos.writeUTF(RESPONSE_FAILURE);
                                 oos.writeObject(e);
+                                oos.flush();
                             } catch (IOException e1) {
                                 e1.printStackTrace();
                             }
                         }
+                        oos.close();
+                        ois.close();
+                        break;
                     }
                 }
             } catch (IOException e) {

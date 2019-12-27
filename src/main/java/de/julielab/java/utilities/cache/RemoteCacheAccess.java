@@ -66,7 +66,8 @@ public class RemoteCacheAccess<K, V> extends CacheAccess<K, V> {
             try {
                 writeDefaultInformation(CacheServer.METHOD_GET, key, oos);
                 value = (V) ois.readObject();
-                memCache.put(key, value);
+                if (value != null)
+                    memCache.put(key, value);
             } catch (IOException e) {
                 connectionOpen = false;
                 throw new IllegalStateException(e);
@@ -91,6 +92,8 @@ public class RemoteCacheAccess<K, V> extends CacheAccess<K, V> {
         if (!connectionOpen)
             establishConnection();
         try {
+            if (value != null)
+                memCache.put(key, value);
             writeDefaultInformation(CacheServer.METHOD_PUT, key, oos);
             oos.writeObject(value);
             final String response = ois.readUTF();

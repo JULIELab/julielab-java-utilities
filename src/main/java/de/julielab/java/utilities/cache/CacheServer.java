@@ -12,6 +12,7 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -107,6 +108,7 @@ public class CacheServer {
         @Override
         public void run() {
             final CacheService cacheService = CacheService.getInstance();
+            log.trace("Establishing connection to requesting client");
             try (ObjectInputStream ois = new ObjectInputStream(socket.getInputStream()); ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream())) {
                 while (true) {
                     try {
@@ -148,6 +150,12 @@ public class CacheServer {
                             // This is a commit request; we can currently only commit all caches at once.
                             CacheService.getInstance().commitAllCaches();
                         }
+                    } catch (SocketException e) {
+                        if (e.getMessage().contains("Broken pipe")) {
+                            log.debug("Client disconnected (Broken pipe).");
+                        } else {
+                            log.error("Connection error", e);
+                        }
                     } catch (Throwable e) {
                         log.error("Exception occurred. Sending an error message to the client and terminating the connection.", e);
                         if (oos != null) {
@@ -156,7 +164,7 @@ public class CacheServer {
                                 oos.writeObject(e);
                                 oos.flush();
                             } catch (IOException e1) {
-                                e1.printStackTrace();
+                                // OK, so we couldn't even send the error ignore it
                             }
                         }
                         oos.close();

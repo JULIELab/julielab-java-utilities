@@ -42,13 +42,20 @@ public class RemoteCacheTest {
     @Test
     public void test() {
         CacheAccess<String, String> ca = CacheService.getInstance().getCacheAccess("testcache", "RemoteCacheTest", CacheAccess.STRING, CacheAccess.STRING);
+        CacheAccess<String, String> ca2 = CacheService.getInstance().getCacheAccess("testcache", "RemoteCacheTest2", CacheAccess.STRING, CacheAccess.STRING);
         ca.put("key1", "value1");
         assertThat(ca.get("key1")).isEqualTo("value1");
+
+        ca2.put("key21", "value21");
+        ca2.put("key22", "value22");
 
         ca.put("key2", "value2");
         assertThat(ca.get("key2")).isEqualTo("value2");
 
         ca.put("key3", "value3");
         assertThat(ca.get("key3")).isEqualTo("value3");
+
+        assertThat(ca2.get("key21")).isEqualTo("value21");
+        assertThat(ca2.get("key22")).isEqualTo("value22");
     }
 }

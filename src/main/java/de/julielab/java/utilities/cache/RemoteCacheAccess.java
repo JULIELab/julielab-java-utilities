@@ -38,6 +38,7 @@ public class RemoteCacheAccess<K, V> extends CacheAccess<K, V> {
 
     public void establishConnection() {
         try {
+            log.debug("Establishing new connection to cache server at {}:{} for cache ID {} and region {}", host, port, cacheId, cacheRegion);
             Socket s = getSocket();
             oos = new ObjectOutputStream(s.getOutputStream());
             ois = new ObjectInputStream(s.getInputStream());

@@ -140,7 +140,12 @@ public class CacheServer {
                                 oos.writeObject(o);
                                 oos.flush();
                             } else if (method.equalsIgnoreCase(METHOD_PUT)) {
-                                log.trace("Putting data for key '{}' into the cache {}, {}.", key, cacheName, cacheRegion);
+                                if (log.isTraceEnabled()) {
+                                    String valueString = value == null ? null : value.toString();
+                                    if (valueString != null)
+                                        valueString = valueString.substring(0, Math.min(valueString.length(), 79));
+                                    log.trace("Putting data '{}' for key '{}' into the cache {}, {}.", valueString, key, cacheName, cacheRegion);
+                                }
                                 cache.put(key, value);
                                 log.trace("Sending OK response");
                                 oos.writeUTF("OK");

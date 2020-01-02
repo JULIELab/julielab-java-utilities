@@ -36,7 +36,7 @@ public class CacheService {
         this.configuration = configuration;
     }
 
-    public static CacheService getInstance() {
+    public synchronized static CacheService getInstance() {
         String propertyValue = System.getProperty(CACHING_ENABLED_PROP);
         boolean cachingEnabled = propertyValue == null || Boolean.parseBoolean(propertyValue);
         if (cachingEnabled && service == null)
@@ -48,7 +48,7 @@ public class CacheService {
         return service;
     }
 
-    public static void initialize(CacheConfiguration configuration) {
+    public synchronized static void initialize(CacheConfiguration configuration) {
         if (service == null)
             service = new CacheService(configuration);
 
@@ -90,7 +90,7 @@ public class CacheService {
         }
     }
 
-    <K, V> HTreeMap<K, V> getCache(File dbFile, String regionName, Serializer<K> keySerializer, Serializer<V> valueSerializer) {
+    synchronized <K, V> HTreeMap<K, V> getCache(File dbFile, String regionName, Serializer<K> keySerializer, Serializer<V> valueSerializer) {
         final DB filedb = getFiledb(dbFile);
         final DB.HashMapMaker<K, V> dbmaker = filedb.hashMap(regionName).keySerializer(keySerializer).valueSerializer(valueSerializer);
         if (isDbReadOnly(dbFile))
@@ -99,7 +99,7 @@ public class CacheService {
                 createOrOpen();
     }
 
-    void commitCache(File dbFile) {
+    synchronized void commitCache(File dbFile) {
         if (!isDbReadOnly(dbFile))
             getFiledb(dbFile).commit();
         else
@@ -110,7 +110,7 @@ public class CacheService {
         dbs.values().forEach(db -> db.commit());
     }
 
-    private DB getFiledb(File cacheDir) {
+    private synchronized DB getFiledb(File cacheDir) {
         try {
             DB db = dbs.get(cacheDir.getCanonicalPath());
             if (db == null) {

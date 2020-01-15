@@ -1,5 +1,7 @@
 package de.julielab.java.utilities.cache;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import org.mapdb.Serializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,14 +15,20 @@ public class LocalFileCacheAccess<K, V> extends CacheAccess<K, V> {
     private final Serializer<K> keySerializer;
     private final Serializer<V> valueSerializer;
     private final File cacheDir;
+    private Cache<K, V> memCache;
 
     public LocalFileCacheAccess(String cacheId, String cacheRegion, String keySerializer, String valueSerializer, File cacheDir) {
+        this(cacheId, cacheRegion, keySerializer, valueSerializer, cacheDir, 500);
+    }
+
+    public LocalFileCacheAccess(String cacheId, String cacheRegion, String keySerializer, String valueSerializer, File cacheDir, int memCacheSize) {
         super(cacheId, cacheRegion);
         this.keySerializer = getSerializerByName(keySerializer);
         this.valueSerializer = getSerializerByName(valueSerializer);
         this.cacheDir = cacheDir;
         cacheService = CacheService.getInstance();
         cacheFile = new File(getCacheDir(), cacheId);
+        memCache = CacheBuilder.newBuilder().maximumSize(memCacheSize).build();
     }
 
     private File getCacheDir() {
@@ -32,7 +40,13 @@ public class LocalFileCacheAccess<K, V> extends CacheAccess<K, V> {
 
     @Override
     public V get(K key) {
-        return cacheService.getCache(cacheFile, cacheRegion, keySerializer, valueSerializer).get(key);
+        V value = memCache.getIfPresent(key);
+        if (value == null) {
+            value = cacheService.getCache(cacheFile, cacheRegion, keySerializer, valueSerializer).get(key);
+            if (value != null)
+                memCache.put(key, value);
+        }
+        return value;
     }
 
     @Override
@@ -42,6 +56,8 @@ public class LocalFileCacheAccess<K, V> extends CacheAccess<K, V> {
 
     @Override
     public boolean put(K key, V value) {
+        if (value != null)
+            memCache.put(key, value);
         if (!cacheService.isDbReadOnly(cacheFile)) {
             cacheService.getCache(cacheFile, cacheRegion, keySerializer, valueSerializer).put(key, value);
             //  cacheService.commitCache(cacheFile);

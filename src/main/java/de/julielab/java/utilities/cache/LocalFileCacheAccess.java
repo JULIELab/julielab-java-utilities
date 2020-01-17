@@ -18,7 +18,7 @@ public class LocalFileCacheAccess<K, V> extends CacheAccess<K, V> {
     private Cache<K, V> memCache;
 
     public LocalFileCacheAccess(String cacheId, String cacheRegion, String keySerializer, String valueSerializer, File cacheDir) {
-        this(cacheId, cacheRegion, keySerializer, valueSerializer, cacheDir, 500);
+        this(cacheId, cacheRegion, keySerializer, valueSerializer, cacheDir, 100);
     }
 
     public LocalFileCacheAccess(String cacheId, String cacheRegion, String keySerializer, String valueSerializer, File cacheDir, int memCacheSize) {

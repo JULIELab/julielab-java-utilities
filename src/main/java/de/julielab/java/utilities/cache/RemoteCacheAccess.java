@@ -24,7 +24,7 @@ public class RemoteCacheAccess<K, V> extends CacheAccess<K, V> {
     private Cache<K, V> memCache;
 
     public RemoteCacheAccess(String cacheId, String cacheRegion, String keySerializer, String valueSerializer, String host, int port) {
-        this(cacheId, cacheRegion, keySerializer, valueSerializer, host, port, 500);
+        this(cacheId, cacheRegion, keySerializer, valueSerializer, host, port, 100);
     }
 
     public RemoteCacheAccess(String cacheId, String cacheRegion, String keySerializer, String valueSerializer, String host, int port, int memCacheSize) {

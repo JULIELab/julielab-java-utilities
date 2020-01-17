@@ -69,7 +69,7 @@ public class CacheService {
      * @return An object granting access to the requested cache.
      */
     public <K, V> CacheAccess<K, V> getCacheAccess(String cacheId, String cacheRegion, String keySerializerName, String valueSerializerName) {
-        return getCacheAccess(cacheId, cacheRegion, keySerializerName, valueSerializerName, 0);
+        return getCacheAccess(cacheId, cacheRegion, keySerializerName, valueSerializerName, 100);
     }
 
     /**

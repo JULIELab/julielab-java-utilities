@@ -69,14 +69,33 @@ public class CacheService {
      * @return An object granting access to the requested cache.
      */
     public <K, V> CacheAccess<K, V> getCacheAccess(String cacheId, String cacheRegion, String keySerializerName, String valueSerializerName) {
+        return getCacheAccess(cacheId, cacheRegion, keySerializerName, valueSerializerName, 0);
+    }
+
+    /**
+     * <p>This is the method to acquire an actual cache object.</p>
+     * <p>Calling this method results in the creation of or the opening of a concrete cache file. The file
+     * will be created in the directory given by {@link CacheConfiguration#getLocalCacheDir()} or the
+     * respective parameter when starting the cache server in case of a remote cache.</p>
+     *
+     * @param cacheId             An arbitrary name that names the resulting cache file.
+     * @param cacheRegion         An arbitrary name of a region in within the given cacheId.
+     * @param keySerializerName   One of {@link CacheAccess#STRING}, {@link CacheAccess#JAVA}, {@link CacheAccess#BYTEARRAY} or {@link CacheAccess#DOUBLEARRAY}.
+     * @param valueSerializerName One of {@link CacheAccess#STRING}, {@link CacheAccess#JAVA}, {@link CacheAccess#BYTEARRAY} or {@link CacheAccess#DOUBLEARRAY}.
+     * @param memCacheSize        The size of the in-memory cache buffer.
+     * @param <K>                 The cache key type.
+     * @param <V>                 The cache value type.
+     * @return An object granting access to the requested cache.
+     */
+    public <K, V> CacheAccess<K, V> getCacheAccess(String cacheId, String cacheRegion, String keySerializerName, String valueSerializerName, int memCacheSize) {
         String propertyValue = System.getProperty(CACHING_ENABLED_PROP);
         if (propertyValue != null && !Boolean.parseBoolean(propertyValue))
             return new NoOpCacheAccess<>(cacheId, cacheRegion);
         switch (configuration.getCacheType()) {
             case LOCAL:
-                return new LocalFileCacheAccess<>(cacheId, cacheRegion, keySerializerName, valueSerializerName, configuration.getLocalCacheDir());
+                return new LocalFileCacheAccess<>(cacheId, cacheRegion, keySerializerName, valueSerializerName, configuration.getLocalCacheDir(), memCacheSize);
             case REMOTE:
-                return new RemoteCacheAccess<>(cacheId, cacheRegion, keySerializerName, valueSerializerName, configuration.getRemoteCacheHost(), configuration.getRemoteCachePort());
+                return new RemoteCacheAccess<>(cacheId, cacheRegion, keySerializerName, valueSerializerName, configuration.getRemoteCacheHost(), configuration.getRemoteCachePort(), memCacheSize);
             default:
                 throw new IllegalArgumentException("Unknown cache type '" + configuration.getCacheType() + "' in the configuration.");
         }

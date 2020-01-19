@@ -85,6 +85,8 @@ public class RemoteCacheAccess<K, V> extends CacheAccess<K, V> {
         oos.writeUTF(cacheRegion);
         oos.writeUTF(keySerializer);
         oos.writeUTF(valueSerializer);
+        if (key == null)
+            throw new IllegalArgumentException("The cache key is null.");
         oos.writeObject(key);
     }
 

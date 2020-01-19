@@ -80,13 +80,14 @@ public class RemoteCacheAccess<K, V> extends CacheAccess<K, V> {
     }
 
     private void writeDefaultInformation(String method, K key, ObjectOutputStream oos) throws IOException {
+        if (key == null)
+            throw new IllegalArgumentException("The cache key is null.");
         oos.writeUTF(method);
         oos.writeUTF(cacheId);
         oos.writeUTF(cacheRegion);
         oos.writeUTF(keySerializer);
         oos.writeUTF(valueSerializer);
-        if (key == null)
-            throw new IllegalArgumentException("The cache key is null.");
+        System.out.println(key);
         oos.writeObject(key);
     }
 
@@ -99,6 +100,7 @@ public class RemoteCacheAccess<K, V> extends CacheAccess<K, V> {
                 memCache.put(key, value);
             writeDefaultInformation(CacheServer.METHOD_PUT, key, oos);
             oos.writeObject(value);
+            oos.flush();
             final String response = ois.readUTF();
             if (response.equalsIgnoreCase(CacheServer.RESPONSE_FAILURE)) {
                 Exception e = (Exception) ois.readObject();

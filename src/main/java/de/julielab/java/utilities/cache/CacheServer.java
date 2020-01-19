@@ -30,12 +30,12 @@ public class CacheServer {
     private Thread backgroundThread;
 
 
-    public CacheServer(File cacheDir, String host, int port, int numThreads) {
+    public CacheServer(File cacheDir, String host, int port) {
         this.cacheDir = cacheDir;
         this.host = host;
         this.port = port;
         CacheService.initialize(new CacheConfiguration(CacheService.CacheType.REMOTE, null, host, port, false));
-        executorService = Executors.newFixedThreadPool(numThreads);
+        executorService = Executors.newCachedThreadPool();
         if (!cacheDir.exists())
             cacheDir.mkdirs();
     }
@@ -44,9 +44,8 @@ public class CacheServer {
         final File cacheDir = new File(args[0]);
         final String host = args[1];
         final int port = Integer.valueOf(args[2]);
-        final int numThreads = Integer.valueOf(args[3]);
-        log.info("Starting logger with cacheDir {}, host {}, port {} and the number of threads {}", cacheDir, host, port, numThreads);
-        final CacheServer cacheServer = new CacheServer(cacheDir, host, port, numThreads);
+        log.info("Starting logger with cacheDir {}, host {} and port {}", cacheDir, host, port);
+        final CacheServer cacheServer = new CacheServer(cacheDir, host, port);
         cacheServer.run();
     }
 

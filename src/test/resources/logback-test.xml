@@ -9,6 +9,7 @@
         </encoder>
     </appender>
     <logger name="de.julielab.java.utilities" level="TRACE"/>
+    <logger name="de.julielab.java.utilities.cache" level="TRACE"/>
     <root level="INFO">
         <appender-ref ref="STXOUT"/>
     </root>

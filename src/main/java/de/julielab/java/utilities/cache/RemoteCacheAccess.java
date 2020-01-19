@@ -37,6 +37,8 @@ public class RemoteCacheAccess<K, V> extends CacheAccess<K, V> {
     }
 
     public void establishConnection() {
+        if (connectionOpen)
+            return;
         try {
             log.debug("Establishing new connection to cache server at {}:{} for cache ID {} and region {}", host, port, cacheId, cacheRegion);
             Socket s = getSocket();
@@ -59,11 +61,10 @@ public class RemoteCacheAccess<K, V> extends CacheAccess<K, V> {
     }
 
     @Override
-    public V get(K key) {
+    public synchronized V get(K key) {
         V value = memCache.getIfPresent(key);
         if (value == null) {
-            if (!connectionOpen)
-                establishConnection();
+            establishConnection();
             try {
                 writeDefaultInformation(CacheServer.METHOD_GET, key, oos);
                 value = (V) ois.readObject();
@@ -103,9 +104,8 @@ public class RemoteCacheAccess<K, V> extends CacheAccess<K, V> {
     }
 
     @Override
-    public boolean put(K key, V value) {
-        if (!connectionOpen)
-            establishConnection();
+    public synchronized boolean put(K key, V value) {
+        establishConnection();
         try {
             if (value != null)
                 memCache.put(key, value);
@@ -139,9 +139,8 @@ public class RemoteCacheAccess<K, V> extends CacheAccess<K, V> {
     }
 
     @Override
-    public void commit() {
-        if (!connectionOpen)
-            establishConnection();
+    public synchronized void commit() {
+        establishConnection();
         try {
             // Sending a null key will cause all caches to be committed. If we should need the commit
             // of individual caches in the future, that feature would need to be implemented because it is not

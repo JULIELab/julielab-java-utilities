@@ -17,7 +17,6 @@ import java.util.Set;
 import static de.julielab.java.utilities.cache.CacheService.CacheType.LOCAL;
 
 public class CacheService {
-    private final static Logger log = LoggerFactory.getLogger(CacheService.class);
     /**
      * <p>Java system property name to enable or disable caching. No value is interpreted as 'true'.</p>
      * <p>This property can be used to disable caching. When set to 'false', all methods returning an
@@ -27,6 +26,7 @@ public class CacheService {
      * necessary.</p>
      */
     public static final String CACHING_ENABLED_PROP = "de.julielab.java.utilities.cache.enabled";
+    private final static Logger log = LoggerFactory.getLogger(CacheService.class);
     private static CacheService service;
     private Map<String, DB> dbs = new HashMap<>();
     private Set<String> readOnly = new HashSet<>();
@@ -133,18 +133,25 @@ public class CacheService {
         try {
             DB db = dbs.get(cacheDir.getCanonicalPath());
             if (db == null) {
-                final DBMaker.Maker dbmaker = DBMaker
-                        .fileDB(cacheDir.getAbsolutePath())
-                        .fileMmapEnable()
-                        .transactionEnable()
-                        .closeOnJvmShutdown();
-                if (configuration.getCacheType() == LOCAL && configuration.isReadOnly() && cacheDir.exists()) {
-                    dbmaker.readOnly();
-                    readOnly.add(cacheDir.getCanonicalPath());
+                DBMaker.Maker dbmaker;
+                synchronized (this) {
+                    if (!dbs.containsKey(cacheDir.getCanonicalPath())) {
+                        dbmaker = DBMaker
+                                .fileDB(cacheDir.getAbsolutePath())
+                                .fileMmapEnable()
+                                .transactionEnable()
+                                .closeOnJvmShutdown();
+                        if (configuration.getCacheType() == LOCAL && configuration.isReadOnly() && cacheDir.exists()) {
+                            dbmaker.readOnly();
+                            readOnly.add(cacheDir.getCanonicalPath());
+                        }
+                        db = dbmaker.make();
+                        dbs.put(cacheDir.getCanonicalPath(), db);
+                        log.debug("Is cache at {} thread safe: {}", cacheDir, db.isThreadSafe());
+                    } else {
+                        db = dbs.get(cacheDir.getCanonicalPath());
+                    }
                 }
-                db = dbmaker.make();
-                dbs.put(cacheDir.getCanonicalPath(), db);
-                log.debug("Is cache at {} thread safe: {}", cacheDir, db.isThreadSafe());
             }
             return db;
         } catch (IOException e) {

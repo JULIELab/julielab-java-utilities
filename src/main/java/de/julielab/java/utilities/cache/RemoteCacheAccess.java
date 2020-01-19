@@ -70,6 +70,17 @@ public class RemoteCacheAccess<K, V> extends CacheAccess<K, V> {
                 if (value != null)
                     memCache.put(key, value);
             } catch (IOException e) {
+                log.trace("Closing connection to {}:{}, cache ID {} and region {} due to exception in get().", host, port, cacheId, cacheRegion, e);
+                try {
+                    oos.close();
+                } catch (IOException ex) {
+                    //
+                }
+                try {
+                    ois.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
                 connectionOpen = false;
                 throw new IllegalStateException(e);
             } catch (ClassNotFoundException e) {
@@ -82,12 +93,12 @@ public class RemoteCacheAccess<K, V> extends CacheAccess<K, V> {
     private void writeDefaultInformation(String method, K key, ObjectOutputStream oos) throws IOException {
         if (key == null)
             throw new IllegalArgumentException("The cache key is null.");
+
         oos.writeUTF(method);
         oos.writeUTF(cacheId);
         oos.writeUTF(cacheRegion);
         oos.writeUTF(keySerializer);
         oos.writeUTF(valueSerializer);
-        System.out.println(key);
         oos.writeObject(key);
     }
 
@@ -108,7 +119,13 @@ public class RemoteCacheAccess<K, V> extends CacheAccess<K, V> {
             }
             return response.equals(CacheServer.RESPONSE_OK);
         } catch (IOException e) {
+            log.trace("Closing connection to {}:{}, cache ID {} and region {} due to exception in put().", host, port, cacheId, cacheRegion, e);
             connectionOpen = false;
+            try {
+                oos.close();
+            } catch (IOException ex) {
+                //
+            }
             e.printStackTrace();
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
@@ -126,7 +143,7 @@ public class RemoteCacheAccess<K, V> extends CacheAccess<K, V> {
         if (!connectionOpen)
             establishConnection();
         try {
-            // Sending a null key will cause all caches to be comitted. If we should need the commit
+            // Sending a null key will cause all caches to be committed. If we should need the commit
             // of individual caches in the future, that feature would need to be implemented because it is not
             // possible currently.
             writeDefaultInformation(CacheServer.METHOD_PUT, null, oos);
@@ -134,6 +151,17 @@ public class RemoteCacheAccess<K, V> extends CacheAccess<K, V> {
             ois.close();
             connectionOpen = false;
         } catch (IOException e) {
+            log.trace("Closing connection to {}:{}, cache ID {} and region {} due to exception in commit().", host, port, cacheId, cacheRegion, e);
+            try {
+                oos.close();
+            } catch (IOException ex) {
+                //
+            }
+            try {
+                ois.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
             connectionOpen = false;
             e.printStackTrace();
         }

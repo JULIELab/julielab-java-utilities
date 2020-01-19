@@ -109,7 +109,7 @@ public class CacheService {
         }
     }
 
-    synchronized <K, V> HTreeMap<K, V> getCache(File dbFile, String regionName, Serializer<K> keySerializer, Serializer<V> valueSerializer) {
+    <K, V> HTreeMap<K, V> getCache(File dbFile, String regionName, Serializer<K> keySerializer, Serializer<V> valueSerializer) {
         final DB filedb = getFiledb(dbFile);
         final DB.HashMapMaker<K, V> dbmaker = filedb.hashMap(regionName).keySerializer(keySerializer).valueSerializer(valueSerializer);
         if (isDbReadOnly(dbFile))
@@ -129,7 +129,7 @@ public class CacheService {
         dbs.values().forEach(db -> db.commit());
     }
 
-    private synchronized DB getFiledb(File cacheDir) {
+    private DB getFiledb(File cacheDir) {
         try {
             DB db = dbs.get(cacheDir.getCanonicalPath());
             if (db == null) {
@@ -144,6 +144,7 @@ public class CacheService {
                 }
                 db = dbmaker.make();
                 dbs.put(cacheDir.getCanonicalPath(), db);
+                log.debug("Is cache at {} thread safe: {}", cacheDir, db.isThreadSafe());
             }
             return db;
         } catch (IOException e) {

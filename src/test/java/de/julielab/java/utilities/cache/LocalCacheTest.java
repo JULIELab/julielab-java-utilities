@@ -41,7 +41,7 @@ public class LocalCacheTest {
 
     @Test
     public void testEvictMaxSizeOverflow() {
-        CacheAccess<String, String> cacheAccess = CacheService.getInstance().getCacheAccess("testcache", "InMemTest", CacheAccess.STRING, CacheAccess.STRING, new CacheMapSettings(CacheMapSettings.MEM_CACHE_SIZE, 2L, CacheMapSettings.EXPIRE_AFTER_CREATE, true));
+        CacheAccess<String, String> cacheAccess = CacheService.getInstance().getCacheAccess("testcache", "InMemTest", CacheAccess.STRING, CacheAccess.STRING, new CacheMapSettings(CacheMapSettings.MEM_CACHE_SIZE, 2L));
         LocalFileCacheAccess<String, String> ca = (LocalFileCacheAccess<String, String>) cacheAccess;
         for (int i = 0; i < 20; i++)
             ca.put("key" + i, "val" + i);

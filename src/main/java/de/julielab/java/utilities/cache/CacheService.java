@@ -171,9 +171,13 @@ public class CacheService {
         for (String setting : mapSettings.keySet()) {
             switch (setting) {
                 case MAX_SIZE:
+                    if (mapSettings.get(EXPIRE_AFTER_CREATE) == null && mapSettings.get(EXPIRE_AFTER_GET) == null && mapSettings.get(EXPIRE_AFTER_UPDATE) == null)
+                        log.warn("A maximum cache size is given but no trigger (after create, get or update) that would enqueue elements for eviction has been specified. Eviction will not happen.");
                     dbmaker.expireMaxSize((Long) mapSettings.get(MAX_SIZE));
                     break;
                 case OVERFLOW_DB:
+                    if (mapSettings.get(EXPIRE_AFTER_CREATE) == null && mapSettings.get(EXPIRE_AFTER_GET) == null && mapSettings.get(EXPIRE_AFTER_UPDATE) == null)
+                        log.warn("An expiration overflow map is given but no trigger (after create, get or update) that would enqueue elements for eviction has been specified. Overflow will not happen.");
                     dbmaker.expireOverflow((Map<K, V>) mapSettings.get(OVERFLOW_DB));
                     break;
                 case EXPIRE_EXECUTOR:

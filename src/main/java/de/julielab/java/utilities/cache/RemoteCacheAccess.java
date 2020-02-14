@@ -139,6 +139,11 @@ public class RemoteCacheAccess<K, V> extends CacheAccess<K, V> {
     }
 
     @Override
+    public boolean isClosed() {
+        return false;
+    }
+
+    @Override
     public synchronized void commit() {
         establishConnection();
         try {

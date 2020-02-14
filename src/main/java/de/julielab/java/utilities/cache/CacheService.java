@@ -31,6 +31,7 @@ public class CacheService {
     private Map<String, DB> dbs = new HashMap<>();
     private Set<String> readOnly = new HashSet<>();
     private CacheConfiguration configuration;
+    private List<CacheAccess<?, ?>> cacheAccesses = new ArrayList<>();
 
     private CacheService(CacheConfiguration configuration) {
         this.configuration = configuration;
@@ -88,17 +89,41 @@ public class CacheService {
      * @return An object granting access to the requested cache.
      */
     public <K, V> CacheAccess<K, V> getCacheAccess(String cacheId, String cacheRegion, String keySerializerName, String valueSerializerName, long memCacheSize) {
+        CacheAccess<K, V> ret;
         String propertyValue = System.getProperty(CACHING_ENABLED_PROP);
         if (propertyValue != null && !Boolean.parseBoolean(propertyValue))
             return new NoOpCacheAccess<>(cacheId, cacheRegion);
         switch (configuration.getCacheType()) {
             case LOCAL:
-                return new LocalFileCacheAccess<>(cacheId, cacheRegion, keySerializerName, valueSerializerName, configuration.getLocalCacheDir(), memCacheSize);
+                ret = new LocalFileCacheAccess<>(cacheId, cacheRegion, keySerializerName, valueSerializerName, configuration.getLocalCacheDir(), memCacheSize);
+                break;
             case REMOTE:
-                return new RemoteCacheAccess<>(cacheId, cacheRegion, keySerializerName, valueSerializerName, configuration.getRemoteCacheHost(), configuration.getRemoteCachePort(), memCacheSize);
+                ret = new RemoteCacheAccess<>(cacheId, cacheRegion, keySerializerName, valueSerializerName, configuration.getRemoteCacheHost(), configuration.getRemoteCachePort(), memCacheSize);
+                break;
             default:
                 throw new IllegalArgumentException("Unknown cache type '" + configuration.getCacheType() + "' in the configuration.");
         }
+        cacheAccesses.add(ret);
+        return ret;
+    }
+
+    public <K, V> CacheAccess<K, V> getCacheAccess(String cacheId, String cacheRegion, String keySerializerName, String valueSerializerName, CacheMapSettings mapSettings) {
+        CacheAccess<K, V> ret;
+        String propertyValue = System.getProperty(CACHING_ENABLED_PROP);
+        if (propertyValue != null && !Boolean.parseBoolean(propertyValue))
+            return new NoOpCacheAccess<>(cacheId, cacheRegion);
+        switch (configuration.getCacheType()) {
+            case LOCAL:
+                ret = new LocalFileCacheAccess<>(cacheId, cacheRegion, keySerializerName, valueSerializerName, configuration.getLocalCacheDir(), mapSettings);
+                break;
+            case REMOTE:
+                ret = new RemoteCacheAccess<>(cacheId, cacheRegion, keySerializerName, valueSerializerName, configuration.getRemoteCacheHost(), configuration.getRemoteCachePort(), (long) mapSettings.get(MEM_CACHE_SIZE));
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown cache type '" + configuration.getCacheType() + "' in the configuration.");
+        }
+        cacheAccesses.add(ret);
+        return ret;
     }
 
     boolean isDbReadOnly(File file) {
@@ -110,15 +135,19 @@ public class CacheService {
     }
 
     synchronized void commitCache(File dbFile) {
-        if (!isDbReadOnly(dbFile))
-            getFiledb(dbFile).commit();
-        else
+        if (!isDbReadOnly(dbFile)) {
+            try {
+                dbs.get(dbFile.getCanonicalPath()).commit();
+            } catch (IOException e) {
+                log.error("Could not commit db at {}.", dbFile, e);
+            }
+        } else
             log.debug("Cannot commit cache {} because it is read-only.", dbFile);
     }
 
 
     <K, V> BTreeMap<K, V> getBTreeCache(File dbFile, String regionName, GroupSerializer<K> keySerializer, GroupSerializer<V> valueSerializer, Map<String, Object> mapSettings) {
-        final DB db = mapSettings.get(PERSIST_TYPE) == CachePersistenceType.DISC ? getFiledb(dbFile) : getMemdb(dbFile.getName());
+        final DB db = mapSettings.get(PERSIST_TYPE) == CachePersistenceType.MEM ? getMemdb(dbFile.getName()) : getFiledb(dbFile);
         final DB.TreeMapMaker<K, V> dbmaker = db.treeMap(regionName).keySerializer(keySerializer).valueSerializer(valueSerializer);
         for (String setting : mapSettings.keySet()) {
             switch (setting) {
@@ -137,7 +166,7 @@ public class CacheService {
     }
 
     <K, V> HTreeMap<K, V> getHTreeCache(File dbFile, String regionName, GroupSerializer<K> keySerializer, GroupSerializer<V> valueSerializer, Map<String, Object> mapSettings) {
-        final DB db = mapSettings.get(PERSIST_TYPE) == CachePersistenceType.DISC ? getFiledb(dbFile) : getMemdb(dbFile.getName());
+        final DB db = mapSettings.get(PERSIST_TYPE) == CachePersistenceType.MEM ? getMemdb(dbFile.getName()) : getFiledb(dbFile);
         final DB.HashMapMaker<K, V> dbmaker = db.hashMap(regionName).keySerializer(keySerializer).valueSerializer(valueSerializer);
         for (String setting : mapSettings.keySet()) {
             switch (setting) {
@@ -198,16 +227,17 @@ public class CacheService {
     }
 
     public void commitAllCaches() {
-        dbs.values().forEach(db -> db.commit());
+        // We issue commit commands to all the cache accesses that
+        cacheAccesses.stream().filter(ca -> !ca.isClosed()).forEach(CacheAccess::commit);
     }
 
     private DB getFiledb(File cacheDir) {
         try {
             DB db = dbs.get(cacheDir.getCanonicalPath());
-            if (db == null) {
+            if (db == null || db.isClosed() || db.getStore().isClosed()) {
                 DBMaker.Maker dbmaker;
                 synchronized (this) {
-                    if (!dbs.containsKey(cacheDir.getCanonicalPath())) {
+                    if (!dbs.containsKey(cacheDir.getCanonicalPath()) || db.isClosed() || db.getStore().isClosed()) {
                         dbmaker = DBMaker
                                 .fileDB(cacheDir.getAbsolutePath())
                                 .fileMmapEnable()
@@ -233,14 +263,13 @@ public class CacheService {
 
     private DB getMemdb(String name) {
         DB db = dbs.get(name);
-        if (db == null) {
+        if (db == null || db.isClosed()) {
             DBMaker.Maker dbmaker;
             synchronized (this) {
-                if (!dbs.containsKey(name)) {
+                if (!dbs.containsKey(name) || db.isClosed()) {
                     dbmaker = DBMaker
                             .memoryDB()
                             .closeOnJvmShutdown();
-
                     db = dbmaker.make();
                     dbs.put(name, db);
                 } else {

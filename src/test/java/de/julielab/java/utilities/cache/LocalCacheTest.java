@@ -8,6 +8,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 public class LocalCacheTest {
     @BeforeClass
     public static void setup() {
@@ -26,7 +29,32 @@ public class LocalCacheTest {
         ca.put("testkey", l);
         ca.commit();
         l.set(0, "fuenf");
+        // There is no update by reference
         l = ca.get("testkey");
-        System.out.println(l);
+        assertEquals("eins", l.get(0));
+        // We need to put the value again to make the change happen (this is different from the guava in-´memory cache!)
+        l.set(0, "fuenf");
+        ca.put("testkey", l);
+        l = ca.get("testkey");
+        assertEquals("fuenf", l.get(0));
+    }
+
+    @Test
+    public void testEvictMaxSizeOverflow() {
+        CacheAccess<String, String> cacheAccess = CacheService.getInstance().getCacheAccess("testcache", "InMemTest", CacheAccess.STRING, CacheAccess.STRING, new CacheMapSettings(CacheMapSettings.MEM_CACHE_SIZE, 2L, CacheMapSettings.EXPIRE_AFTER_CREATE, true));
+        LocalFileCacheAccess<String, String> ca = (LocalFileCacheAccess<String, String>) cacheAccess;
+        for (int i = 0; i < 20; i++)
+            ca.put("key" + i, "val" + i);
+
+
+        ca.commit();
+        ca.close();
+
+        cacheAccess = CacheService.getInstance().getCacheAccess("testcache", "InMemTest", CacheAccess.STRING, CacheAccess.STRING, new CacheMapSettings(CacheMapSettings.MEM_CACHE_SIZE, 2L));
+        ca = (LocalFileCacheAccess<String, String>) cacheAccess;
+        for (int i = 0; i < 20; i++) {
+            assertNotNull(ca.get("key" + i));
+        }
+
     }
 }

@@ -21,6 +21,11 @@ public class NoOpCacheAccess<K, V> extends CacheAccess<K, V> {
     }
 
     @Override
+    public boolean isClosed() {
+        return false;
+    }
+
+    @Override
     public void commit() {
         // no-op
     }

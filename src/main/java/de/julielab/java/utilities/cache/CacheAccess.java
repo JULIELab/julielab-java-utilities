@@ -37,8 +37,11 @@ public abstract class CacheAccess<K, V> {
 
     public abstract boolean isReadOnly();
 
+    public abstract boolean isClosed();
+
     /**
      * Committing the cache contents to file. This is the operation that makes the index actually persistent.
      */
     public abstract void commit();
+
 }

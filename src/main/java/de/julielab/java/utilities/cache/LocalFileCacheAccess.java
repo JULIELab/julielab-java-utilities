@@ -1,5 +1,7 @@
 package de.julielab.java.utilities.cache;
 
+import org.mapdb.BTreeMap;
+import org.mapdb.HTreeMap;
 import org.mapdb.serializer.GroupSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,8 +18,9 @@ public class LocalFileCacheAccess<K, V> extends CacheAccess<K, V> {
     private final GroupSerializer<K> keySerializer;
     private final GroupSerializer<V> valueSerializer;
     private final File cacheDir;
-    private final File memCacheName;
     private Map<K, V> cache;
+    private Map<K, V> persistentCache;
+    private boolean hasMemCache;
 
     public LocalFileCacheAccess(String cacheId, String cacheRegion, String keySerializer, String valueSerializer, File cacheDir) {
         this(cacheId, cacheRegion, keySerializer, valueSerializer, cacheDir, 100);
@@ -36,14 +39,21 @@ public class LocalFileCacheAccess<K, V> extends CacheAccess<K, V> {
         else
             cache = cacheService.getBTreeCache(cacheFile, cacheRegion, this.keySerializer, this.valueSerializer, mapSettings);
 
-        memCacheName = new File(cacheId + ".mem");
+        persistentCache = cache;
+
         if ((long) mapSettings.get(MEM_CACHE_SIZE) > 0) {
-            cache = cacheService.getHTreeCache(memCacheName, cacheId + ".mem", this.keySerializer, this.valueSerializer, new CacheMapSettings(MAX_SIZE, mapSettings.get(MEM_CACHE_SIZE), OVERFLOW_DB, cache));
+            File memCacheName = new File(cacheId + ".mem");
+            cache = cacheService.getHTreeCache(memCacheName, cacheId + ".mem", this.keySerializer, this.valueSerializer, new CacheMapSettings(PERSIST_TYPE, CacheService.CachePersistenceType.MEM, CacheMapSettings.EXPIRE_AFTER_CREATE, true, MAX_SIZE, mapSettings.get(MEM_CACHE_SIZE), OVERFLOW_DB, cache));
+            hasMemCache = true;
         }
     }
 
     public LocalFileCacheAccess(String cacheId, String cacheRegion, String keySerializer, String valueSerializer, File cacheDir, long memCacheSize) {
         this(cacheId, cacheRegion, keySerializer, valueSerializer, cacheDir, new CacheMapSettings(MEM_CACHE_SIZE, memCacheSize));
+    }
+
+    public Map<K, V> getCache() {
+        return cache;
     }
 
     private File getCacheDir() {
@@ -60,6 +70,11 @@ public class LocalFileCacheAccess<K, V> extends CacheAccess<K, V> {
 
     @Override
     public void commit() {
+        if (hasMemCache) {
+            // Add the remaining in-memory items to the persistent cache without clearing the in-memory cache
+            for (K key : cache.keySet())
+                persistentCache.put(key, cache.get(key));
+        }
         cacheService.commitCache(cacheFile);
     }
 
@@ -79,4 +94,26 @@ public class LocalFileCacheAccess<K, V> extends CacheAccess<K, V> {
         return cacheService.isDbReadOnly(cacheFile);
     }
 
+    @Override
+    public boolean isClosed() {
+        if (cache instanceof HTreeMap)
+            return ((HTreeMap<K, V>) cache).isClosed();
+        else if (cache instanceof BTreeMap)
+            return ((BTreeMap<K, V>) cache).isClosed();
+        log.error("Unhandled cache map class {}", cache.getClass());
+        return false;
+    }
+
+    public void close() {
+        if (cache instanceof HTreeMap)
+            ((HTreeMap<K, V>) cache).close();
+        else if (cache instanceof BTreeMap)
+            ((BTreeMap<K, V>) cache).close();
+        if (persistentCache != null) {
+            if (persistentCache instanceof HTreeMap)
+                ((HTreeMap<K, V>) persistentCache).close();
+            else if (persistentCache instanceof BTreeMap)
+                ((BTreeMap<K, V>) persistentCache).close();
+        }
+    }
 }

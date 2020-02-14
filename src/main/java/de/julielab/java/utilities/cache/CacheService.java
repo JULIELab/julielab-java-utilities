@@ -253,7 +253,6 @@ public class CacheService {
                         }
                         db = dbmaker.make();
                         dbs.put(cacheDir.getCanonicalPath(), db);
-                        log.debug("Is cache at {} thread safe: {}", cacheDir, db.isThreadSafe());
                     } else {
                         db = dbs.get(cacheDir.getCanonicalPath());
                     }

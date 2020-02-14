@@ -43,7 +43,7 @@ public class LocalFileCacheAccess<K, V> extends CacheAccess<K, V> {
 
         if ((long) mapSettings.get(MEM_CACHE_SIZE) > 0) {
             File memCacheName = new File(cacheId + ".mem");
-            cache = cacheService.getHTreeCache(memCacheName, cacheId + ".mem", this.keySerializer, this.valueSerializer, new CacheMapSettings(PERSIST_TYPE, CacheService.CachePersistenceType.MEM, CacheMapSettings.EXPIRE_AFTER_CREATE, true, MAX_SIZE, mapSettings.get(MEM_CACHE_SIZE), OVERFLOW_DB, cache));
+            cache = cacheService.getHTreeCache(memCacheName, cacheRegion + ".mem", this.keySerializer, this.valueSerializer, new CacheMapSettings(PERSIST_TYPE, CacheService.CachePersistenceType.MEM, CacheMapSettings.EXPIRE_AFTER_CREATE, true, MAX_SIZE, mapSettings.get(MEM_CACHE_SIZE), OVERFLOW_DB, cache));
             hasMemCache = true;
         }
     }

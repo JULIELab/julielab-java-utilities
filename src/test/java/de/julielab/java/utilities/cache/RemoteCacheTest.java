@@ -29,7 +29,7 @@ public class RemoteCacheTest {
             FileUtils.deleteQuietly(cacheDir);
         int numTries = 0;
         while (cacheServer == null && numTries < 3) {
-            cacheServer = new CacheServer(cacheDir, host, port, 4);
+            cacheServer = new CacheServer(cacheDir, host, port);
             port = random.nextInt(1000) + 9000;
             ++numTries;
         }

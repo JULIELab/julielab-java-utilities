@@ -1,7 +1,7 @@
 package de.julielab.java.utilities.cache;
 
 import org.mapdb.HTreeMap;
-import org.mapdb.Serializer;
+import org.mapdb.serializer.GroupSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -125,8 +125,8 @@ public class CacheServer {
                             if (method.equalsIgnoreCase(METHOD_PUT))
                                 value = ois.readObject();
 
-                            Serializer<?> keySerializer = CacheAccess.getSerializerByName(keySerializerName);
-                            Serializer<?> valueSerializer = CacheAccess.getSerializerByName(valueSerializerName);
+                            GroupSerializer<?> keySerializer = CacheAccess.getSerializerByName(keySerializerName);
+                            GroupSerializer<?> valueSerializer = CacheAccess.getSerializerByName(valueSerializerName);
                             final File cacheFile = new File(cacheDir.getAbsolutePath(), cacheName);
                             final HTreeMap cache = cacheService.getCache(cacheFile, cacheRegion, keySerializer, valueSerializer);
 

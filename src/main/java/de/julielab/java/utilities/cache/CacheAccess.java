@@ -1,6 +1,7 @@
 package de.julielab.java.utilities.cache;
 
 import org.mapdb.Serializer;
+import org.mapdb.serializer.GroupSerializer;
 
 public abstract class CacheAccess<K, V> {
     public static final String STRING = "string";
@@ -15,16 +16,16 @@ public abstract class CacheAccess<K, V> {
         this.cacheRegion = cacheRegion;
     }
 
-    public static <T> Serializer<T> getSerializerByName(String name) {
+    public static <T> GroupSerializer<T> getSerializerByName(String name) {
         switch (name.toLowerCase()) {
             case STRING:
-                return (Serializer<T>) Serializer.STRING;
+                return (GroupSerializer<T>) Serializer.STRING;
             case JAVA:
                 return Serializer.JAVA;
             case BYTEARRAY:
-                return (Serializer<T>) Serializer.BYTE_ARRAY;
+                return (GroupSerializer<T>) Serializer.BYTE_ARRAY;
             case DOUBLEARRAY:
-                return (Serializer<T>) Serializer.DOUBLE_ARRAY;
+                return (GroupSerializer<T>) Serializer.DOUBLE_ARRAY;
             default:
                 throw new IllegalArgumentException("Unsupported cache serializer '" + name + "'.");
         }

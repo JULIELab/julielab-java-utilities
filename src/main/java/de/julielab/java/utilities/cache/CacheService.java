@@ -1,19 +1,19 @@
 package de.julielab.java.utilities.cache;
 
+import org.mapdb.BTreeMap;
 import org.mapdb.DB;
 import org.mapdb.DBMaker;
 import org.mapdb.HTreeMap;
-import org.mapdb.Serializer;
+import org.mapdb.serializer.GroupSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ScheduledExecutorService;
 
+import static de.julielab.java.utilities.cache.CacheMapSettings.*;
 import static de.julielab.java.utilities.cache.CacheService.CacheType.LOCAL;
 
 public class CacheService {
@@ -87,7 +87,7 @@ public class CacheService {
      * @param <V>                 The cache value type.
      * @return An object granting access to the requested cache.
      */
-    public <K, V> CacheAccess<K, V> getCacheAccess(String cacheId, String cacheRegion, String keySerializerName, String valueSerializerName, int memCacheSize) {
+    public <K, V> CacheAccess<K, V> getCacheAccess(String cacheId, String cacheRegion, String keySerializerName, String valueSerializerName, long memCacheSize) {
         String propertyValue = System.getProperty(CACHING_ENABLED_PROP);
         if (propertyValue != null && !Boolean.parseBoolean(propertyValue))
             return new NoOpCacheAccess<>(cacheId, cacheRegion);
@@ -109,20 +109,92 @@ public class CacheService {
         }
     }
 
-    <K, V> HTreeMap<K, V> getCache(File dbFile, String regionName, Serializer<K> keySerializer, Serializer<V> valueSerializer) {
-        final DB filedb = getFiledb(dbFile);
-        final DB.HashMapMaker<K, V> dbmaker = filedb.hashMap(regionName).keySerializer(keySerializer).valueSerializer(valueSerializer);
+    synchronized void commitCache(File dbFile) {
+        if (!isDbReadOnly(dbFile))
+            getFiledb(dbFile).commit();
+        else
+            log.debug("Cannot commit cache {} because it is read-only.", dbFile);
+    }
+
+
+    <K, V> BTreeMap<K, V> getBTreeCache(File dbFile, String regionName, GroupSerializer<K> keySerializer, GroupSerializer<V> valueSerializer, Map<String, Object> mapSettings) {
+        final DB db = mapSettings.get(PERSIST_TYPE) == CachePersistenceType.DISC ? getFiledb(dbFile) : getMemdb(dbFile.getName());
+        final DB.TreeMapMaker<K, V> dbmaker = db.treeMap(regionName).keySerializer(keySerializer).valueSerializer(valueSerializer);
+        for (String setting : mapSettings.keySet()) {
+            switch (setting) {
+                case ENABLE_SIZE_COUNT:
+                    if ((boolean) mapSettings.get(ENABLE_SIZE_COUNT)) dbmaker.counterEnable();
+                    break;
+                case MAX_NODE_SIZE:
+                    dbmaker.maxNodeSize((Integer) mapSettings.get(MAX_NODE_SIZE));
+                    break;
+            }
+        }
         if (isDbReadOnly(dbFile))
             return dbmaker.open();
         return dbmaker.
                 createOrOpen();
     }
 
-    synchronized void commitCache(File dbFile) {
-        if (!isDbReadOnly(dbFile))
-            getFiledb(dbFile).commit();
-        else
-            log.debug("Cannot commit cache {} because it is read-only.", dbFile);
+    <K, V> HTreeMap<K, V> getHTreeCache(File dbFile, String regionName, GroupSerializer<K> keySerializer, GroupSerializer<V> valueSerializer, Map<String, Object> mapSettings) {
+        final DB db = mapSettings.get(PERSIST_TYPE) == CachePersistenceType.DISC ? getFiledb(dbFile) : getMemdb(dbFile.getName());
+        final DB.HashMapMaker<K, V> dbmaker = db.hashMap(regionName).keySerializer(keySerializer).valueSerializer(valueSerializer);
+        for (String setting : mapSettings.keySet()) {
+            switch (setting) {
+                case MAX_SIZE:
+                    dbmaker.expireMaxSize((Long) mapSettings.get(MAX_SIZE));
+                    break;
+                case OVERFLOW_DB:
+                    dbmaker.expireOverflow((Map<K, V>) mapSettings.get(OVERFLOW_DB));
+                    break;
+                case EXPIRE_EXECUTOR:
+                    dbmaker.expireExecutor((ScheduledExecutorService) mapSettings.get(EXPIRE_EXECUTOR));
+                    break;
+                case EXPIRE_EXECUTOR_PERIOD:
+                    dbmaker.expireExecutorPeriod((Long) mapSettings.get(EXPIRE_EXECUTOR_PERIOD));
+                    break;
+                case EXPIRE_AFTER_CREATE:
+                    if (Boolean.parseBoolean(String.valueOf(mapSettings.get(EXPIRE_AFTER_CREATE))))
+                        dbmaker.expireAfterCreate();
+                    else
+                        dbmaker.expireAfterCreate((Long) mapSettings.get(EXPIRE_AFTER_CREATE));
+                    break;
+                case EXPIRE_AFTER_GET:
+                    if (Boolean.parseBoolean(String.valueOf(mapSettings.get(EXPIRE_AFTER_GET))))
+                        dbmaker.expireAfterGet();
+                    else
+                        dbmaker.expireAfterGet((Long) mapSettings.get(EXPIRE_AFTER_GET));
+                    break;
+                case EXPIRE_AFTER_UPDATE:
+                    if (Boolean.parseBoolean(String.valueOf(mapSettings.get(EXPIRE_AFTER_UPDATE))))
+                        dbmaker.expireAfterUpdate();
+                    else
+                        dbmaker.expireAfterUpdate((Long) mapSettings.get(EXPIRE_AFTER_UPDATE));
+                    break;
+            }
+        }
+        if (isDbReadOnly(dbFile))
+            return dbmaker.open();
+        return dbmaker.
+                createOrOpen();
+    }
+
+    <K, V> HTreeMap<K, V> getHTreeCache(File dbFile, String regionName, GroupSerializer<K> keySerializer, GroupSerializer<V> valueSerializer) {
+        return getHTreeCache(dbFile, regionName, keySerializer, valueSerializer, Collections.emptyMap());
+    }
+
+    /**
+     * @param dbFile
+     * @param regionName
+     * @param keySerializer
+     * @param valueSerializer
+     * @param <K>
+     * @param <V>
+     * @return
+     * @deprecated Use {@link #getHTreeCache(File, String, GroupSerializer, GroupSerializer)}
+     */
+    <K, V> HTreeMap<K, V> getCache(File dbFile, String regionName, GroupSerializer<K> keySerializer, GroupSerializer<V> valueSerializer) {
+        return getHTreeCache(dbFile, regionName, keySerializer, valueSerializer);
     }
 
     public void commitAllCaches() {
@@ -159,5 +231,29 @@ public class CacheService {
         }
     }
 
+    private DB getMemdb(String name) {
+        DB db = dbs.get(name);
+        if (db == null) {
+            DBMaker.Maker dbmaker;
+            synchronized (this) {
+                if (!dbs.containsKey(name)) {
+                    dbmaker = DBMaker
+                            .memoryDB()
+                            .closeOnJvmShutdown();
+
+                    db = dbmaker.make();
+                    dbs.put(name, db);
+                } else {
+                    db = dbs.get(name);
+                }
+            }
+        }
+        return db;
+    }
+
     public enum CacheType {LOCAL, REMOTE}
+
+    public enum CacheMapDataType {HTREE, BTREE}
+
+    public enum CachePersistenceType {MEM, DISC}
 }

@@ -5,6 +5,7 @@ import org.mapdb.serializer.GroupSerializer;
 
 public abstract class CacheAccess<K, V> {
     public static final String STRING = "string";
+    public static final String BOOL = "bool";
     public static final String JAVA = "java";
     public static final String BYTEARRAY = "bytearray";
     public static final String DOUBLEARRAY = "doublearray";
@@ -20,6 +21,8 @@ public abstract class CacheAccess<K, V> {
         switch (name.toLowerCase()) {
             case STRING:
                 return (GroupSerializer<T>) Serializer.STRING;
+            case BOOL:
+                return (GroupSerializer<T>) Serializer.BOOLEAN;
             case JAVA:
                 return Serializer.JAVA;
             case BYTEARRAY:

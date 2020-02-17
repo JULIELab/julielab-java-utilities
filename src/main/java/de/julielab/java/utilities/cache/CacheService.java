@@ -204,6 +204,9 @@ public class CacheService {
                     else
                         dbmaker.expireAfterUpdate((Long) mapSettings.get(EXPIRE_AFTER_UPDATE));
                     break;
+                case MAX_STORE_SIZE:
+                    dbmaker.expireStoreSize((Long) mapSettings.get(MAX_STORE_SIZE));
+                    break;
             }
         }
         if (isDbReadOnly(dbFile))

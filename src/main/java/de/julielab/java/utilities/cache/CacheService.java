@@ -205,6 +205,8 @@ public class CacheService {
                         dbmaker.expireAfterUpdate((Long) mapSettings.get(EXPIRE_AFTER_UPDATE));
                     break;
                 case MAX_STORE_SIZE:
+                    if (mapSettings.get(EXPIRE_AFTER_CREATE) == null && mapSettings.get(EXPIRE_AFTER_GET) == null && mapSettings.get(EXPIRE_AFTER_UPDATE) == null)
+                        log.warn("A maximum cache store size is given but no trigger (after create, get or update) that would enqueue elements for eviction has been specified. Overflow will not happen.");
                     dbmaker.expireStoreSize((Long) mapSettings.get(MAX_STORE_SIZE));
                     break;
             }

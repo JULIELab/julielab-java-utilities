@@ -8,8 +8,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 public class LocalCacheTest {
     @BeforeClass
@@ -54,6 +53,26 @@ public class LocalCacheTest {
         ca = (LocalFileCacheAccess<String, String>) cacheAccess;
         for (int i = 0; i < 20; i++) {
             assertNotNull(ca.get("key" + i));
+        }
+
+    }
+
+    @Test
+    public void testMemOnly() {
+        CacheAccess<String, String> cacheAccess = CacheService.getInstance().getCacheAccess("testcache", "InMemTest", CacheAccess.STRING, CacheAccess.STRING, new CacheMapSettings(CacheMapSettings.MEM_CACHE_SIZE, 2L, CacheMapSettings.USE_PERSISTENT_CACHE, false));
+        LocalFileCacheAccess<String, String> ca = (LocalFileCacheAccess<String, String>) cacheAccess;
+        for (int i = 0; i < 20; i++)
+            ca.put("key" + i, "val" + i);
+
+
+        ca.commit();
+        ca.close();
+
+        cacheAccess = CacheService.getInstance().getCacheAccess("testcache", "InMemTest", CacheAccess.STRING, CacheAccess.STRING, new CacheMapSettings(CacheMapSettings.MEM_CACHE_SIZE, 2L));
+        ca = (LocalFileCacheAccess<String, String>) cacheAccess;
+        // There was no persistent cache, all entried should be null.
+        for (int i = 0; i < 20; i++) {
+            assertNull(ca.get("key" + i));
         }
 
     }

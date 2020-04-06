@@ -34,16 +34,27 @@ public class LocalFileCacheAccess<K, V> extends CacheAccess<K, V> {
         cacheService = CacheService.getInstance();
         cacheFile = new File(getCacheDir(), cacheId);
 
-        if (mapSettings.get(MAP_TYPE) == CacheService.CacheMapDataType.HTREE)
-            cache = cacheService.getHTreeCache(cacheFile, cacheRegion, this.keySerializer, this.valueSerializer, mapSettings);
-        else
-            cache = cacheService.getBTreeCache(cacheFile, cacheRegion, this.keySerializer, this.valueSerializer, mapSettings);
+        boolean usePersistentCache = (boolean) mapSettings.getOrDefault(USE_PERSISTENT_CACHE, true);
+        Long memCacheSize = (Long) mapSettings.getOrDefault(MEM_CACHE_SIZE, 0);
+
+        if (!usePersistentCache && memCacheSize == 0)
+            log.warn("Cache {}:{}: The cache settings do not specify the usage of a persistent cache and the in-memory cache is set to size 0 which deactivates it. There is no caching.", cacheId, cacheRegion);
+
+        if (usePersistentCache) {
+            if (mapSettings.get(MAP_TYPE) == CacheService.CacheMapDataType.HTREE)
+                cache = cacheService.getHTreeCache(cacheFile, cacheRegion, this.keySerializer, this.valueSerializer, mapSettings);
+            else
+                cache = cacheService.getBTreeCache(cacheFile, cacheRegion, this.keySerializer, this.valueSerializer, mapSettings);
+        }
 
         persistentCache = cache;
 
-        if ((long) mapSettings.get(MEM_CACHE_SIZE) > 0) {
+        if (memCacheSize > 0) {
             File memCacheName = new File(cacheId + ".mem");
-            cache = cacheService.getHTreeCache(memCacheName, cacheRegion + ".mem", this.keySerializer, this.valueSerializer, new CacheMapSettings(PERSIST_TYPE, CacheService.CachePersistenceType.MEM, CacheMapSettings.EXPIRE_AFTER_CREATE, true, MAX_SIZE, mapSettings.get(MEM_CACHE_SIZE), OVERFLOW_DB, cache));
+            CacheMapSettings memCacheSettings = new CacheMapSettings(PERSIST_TYPE, CacheService.CachePersistenceType.MEM, EXPIRE_AFTER_CREATE, true, MAX_SIZE, memCacheSize);
+            if (persistentCache != null)
+                memCacheSettings.put(OVERFLOW_DB, cache);
+            cache = cacheService.getHTreeCache(memCacheName, cacheRegion + ".mem", this.keySerializer, this.valueSerializer, memCacheSettings);
             hasMemCache = true;
         }
     }
@@ -65,15 +76,21 @@ public class LocalFileCacheAccess<K, V> extends CacheAccess<K, V> {
 
     @Override
     public V get(K key) {
-        return cache.get(key);
+        V value = null;
+        if (value == null) {
+            value = cache.get(key);
+        }
+        return value;
     }
 
     @Override
     public void commit() {
-        if (hasMemCache) {
+        if (hasMemCache && persistentCache != null) {
             // Add the remaining in-memory items to the persistent cache without clearing the in-memory cache
-            for (K key : cache.keySet())
-                persistentCache.put(key, cache.get(key));
+            for (K key : cache.keySet()) {
+                if (!persistentCache.containsKey(key))
+                    persistentCache.put(key, cache.get(key));
+            }
         }
         cacheService.commitCache(cacheFile);
     }

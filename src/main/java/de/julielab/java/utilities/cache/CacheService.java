@@ -137,7 +137,8 @@ public class CacheService {
     synchronized void commitCache(File dbFile) {
         if (!isDbReadOnly(dbFile)) {
             try {
-                dbs.get(dbFile.getCanonicalPath()).commit();
+                if (dbs.containsKey(dbFile.getCanonicalPath()))
+                    dbs.get(dbFile.getCanonicalPath()).commit();
             } catch (IOException e) {
                 log.error("Could not commit db at {}.", dbFile, e);
             }
@@ -147,7 +148,7 @@ public class CacheService {
 
 
     <K, V> BTreeMap<K, V> getBTreeCache(File dbFile, String regionName, GroupSerializer<K> keySerializer, GroupSerializer<V> valueSerializer, Map<String, Object> mapSettings) {
-        final DB db = mapSettings.get(PERSIST_TYPE) == CachePersistenceType.MEM ? getMemdb(dbFile.getName()) : getFiledb(dbFile);
+        final DB db = mapSettings.get(PERSIST_TYPE) == CachePersistenceType.MEM ? getMemdb(dbFile.getName()) : getFiledb(dbFile, true);
         final DB.TreeMapMaker<K, V> dbmaker = db.treeMap(regionName).keySerializer(keySerializer).valueSerializer(valueSerializer);
         for (String setting : mapSettings.keySet()) {
             switch (setting) {
@@ -166,7 +167,8 @@ public class CacheService {
     }
 
     <K, V> HTreeMap<K, V> getHTreeCache(File dbFile, String regionName, GroupSerializer<K> keySerializer, GroupSerializer<V> valueSerializer, Map<String, Object> mapSettings) {
-        final DB db = mapSettings.get(PERSIST_TYPE) == CachePersistenceType.MEM ? getMemdb(dbFile.getName()) : getFiledb(dbFile);
+        boolean transactionsSupported = mapSettings.get(MAX_STORE_SIZE) == null;
+        final DB db = mapSettings.get(PERSIST_TYPE) == CachePersistenceType.MEM ? getMemdb(dbFile.getName()) : getFiledb(dbFile, transactionsSupported);
         final DB.HashMapMaker<K, V> dbmaker = db.hashMap(regionName).keySerializer(keySerializer).valueSerializer(valueSerializer);
         for (String setting : mapSettings.keySet()) {
             switch (setting) {
@@ -240,7 +242,7 @@ public class CacheService {
         cacheAccesses.stream().filter(ca -> !ca.isClosed()).forEach(CacheAccess::commit);
     }
 
-    private DB getFiledb(File cacheDir) {
+    private DB getFiledb(File cacheDir, boolean transactionsSupported) {
         try {
             DB db = dbs.get(cacheDir.getCanonicalPath());
             if (db == null || db.isClosed() || db.getStore().isClosed()) {
@@ -250,8 +252,9 @@ public class CacheService {
                         dbmaker = DBMaker
                                 .fileDB(cacheDir.getAbsolutePath())
                                 .fileMmapEnable()
-                                .transactionEnable()
                                 .closeOnJvmShutdown();
+                        if (transactionsSupported)
+                            dbmaker.transactionEnable();
                         if (configuration.getCacheType() == LOCAL && configuration.isReadOnly() && cacheDir.exists()) {
                             dbmaker.readOnly();
                             readOnly.add(cacheDir.getCanonicalPath());

@@ -16,9 +16,9 @@ note to this readme.
 ## Classes Overview
 
 ### CLIInteractionUtilities.java
-* Helper methods to read from the command line
-* With a message to print or without
-* Restricted to boolean yes/no answers.
+*  Helper methods to read from the command line
+*  With a message to print or without
+*  Restricted to boolean yes/no answers.
 ### CompressionUtilities.java
 * **NOTE**: requires the dependency `org.rauschig`:`jarchivelib`:`0.7.1` to exist on the classpath. This dependency is not resolved transitively from this project.
 * has a method to extract archive files with automatic archive format determination

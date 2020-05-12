@@ -4,9 +4,11 @@ This project should be extended by other commonly useful classes and methods.
 
 Feel free to add more generally useful libraries here! When you do (and please do!), kindly consider the following:
 
-BEFORE EXTENDING this project, please be (reasonably) sure that the desired functionality is not already contained in another libarary. Candidates to check are
-*  [Apache Commons](https://commons.apache.org), check the components on the page
-*  [Google Guava](https://commons.apache.org/proper/commons-lang/), [Java API Docs](http://google.github.io/guava
+BEFORE EXTENDING this project, please be (reasonably) sure that the desired functionality is not already contained in
+ another libarary. Candidates to check are
+
+*   [Apache Commons](https://commons.apache.org), check the components on the page
+*   [Google Guava](https://commons.apache.org/proper/commons-lang/), [Java API Docs](http://google.github.io/guava
 /releases/23.0/api/docs/)
 
 Also, please try to keep the dependencies of the project as small as possible. Whenever external libraries are needed
@@ -16,9 +18,9 @@ note to this readme.
 ## Classes Overview
 
 ### CLIInteractionUtilities.java
-*  Helper methods to read from the command line
-*  With a message to print or without
-*  Restricted to boolean yes/no answers.
+*   Helper methods to read from the command line
+*   With a message to print or without
+*   Restricted to boolean yes/no answers.
 ### CompressionUtilities.java
 * **NOTE**: requires the dependency `org.rauschig`:`jarchivelib`:`0.7.1` to exist on the classpath. This dependency is not resolved transitively from this project.
 * has a method to extract archive files with automatic archive format determination

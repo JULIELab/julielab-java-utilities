@@ -57,8 +57,7 @@ note to this readme.
 ### prerequisites.PrerequisiteChecker
 *   Simple to use API to check parameter values for being not null or not empty. Automatically generates an error report if checks fail via an `IllegalArgumentException.
 *   Example: `PrerequisiteChecker.checkThat().notNull(ob1, ob2).notEmpty(coll).withNames("ob1", "ob2", "coll").execute()`
-*   Is **deactivated** by default: No checks will be performed unless the Java system property `de.julielab
-.prerequisitechecksenabled` is set to `true`.
+*   Is **deactivated** by default: No checks will be performed unless the Java system property `de.julielab.prerequisitechecksenabled` is set to `true`.
 *   Can be used with the `Supplier` interface. This allows to quickly check a path within a given object, e.g. `PrerequisiteChecker.checkThat().notNull(ob).notNull(() -> ob.prop1).notNull(() -> ob.prop1.prop2).withNames("Base object), "Property 1", "Property 2).execute()`
 ### cache.*
 *   **NOTE** requires the dependency `org.mapdb`:`mapdb`:`3.0.7` for the actual cache implementation. This dependency is not resolved transitively from this project.
@@ -69,7 +68,7 @@ note to this readme.
 ### Span Utilities
 *   **NOTE** requires the dependency `org.apache.commons`:`org.apache.commons`:`3.8.1` for the `Range` class. This dependency is not resolved transitively from this project.
 *   Helper classes for objects that cover some kind of integer-valued span
-       *   e.g. word spans, character spans, time spans
+    *   e.g. word spans, character spans, time spans
 *   Particularly useful when span-objects are sought that overlap with a given span.
 *   `de.julielab.java.utilities.spanutils.OffsetMap` maps integer ranges to arbitrary objects, e.g. text annotations. It returns a overlapping-range-restricted subset of itself on request and can return contained objects overlapping a given range.
 *   `de.julielab.java.utilities.spanutils.OffsetSet` stores a set of ranges and allows to retrieve the first range in the set that overlaps a given range.

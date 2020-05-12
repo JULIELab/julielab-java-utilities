@@ -5,9 +5,9 @@ This project should be extended by other commonly useful classes and methods.
 Feel free to add more generally useful libraries here! When you do (and please do!), kindly consider the following:
 
 BEFORE EXTENDING this project, please be (reasonably) sure that the desired functionality is not already contained in another libarary. Candidates to check are
-  * [Apache Commons](https://commons.apache.org), check the components on the page
-  * [Google Guava](https://commons.apache.org/proper/commons-lang/), [Java API Docs](http://google.github.io/guava
- /releases/23.0/api/docs/)
+*  [Apache Commons](https://commons.apache.org), check the components on the page
+*  [Google Guava](https://commons.apache.org/proper/commons-lang/), [Java API Docs](http://google.github.io/guava
+/releases/23.0/api/docs/)
 
 Also, please try to keep the dependencies of the project as small as possible. Whenever external libraries are needed
 only for some specific functionality, set the respective dependencies to the `provided` scope and add a respective

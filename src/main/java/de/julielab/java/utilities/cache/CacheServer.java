@@ -74,7 +74,7 @@ public class CacheServer {
                     try {
                         CacheServer.this.run();
                     } catch (IOException e) {
-                        throw new RuntimeException(e);
+                        throw new IllegalStateException(e);
                     }
                 }
             };

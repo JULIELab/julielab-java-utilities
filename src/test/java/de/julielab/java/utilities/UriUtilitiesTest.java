@@ -14,14 +14,12 @@ import static org.junit.Assert.assertEquals;
 
 public class UriUtilitiesTest {
 
-    private byte[] bytes;
-
     @Test
     public void testGetInputStreamFromUri() throws URISyntaxException, IOException {
         URL here = new File(".").toURI().toURL();
         URI theFile = new URL(here, "src/test/resources/uriTestContent.txt").toURI();
         try (BufferedInputStream is = UriUtilities.getInputStreamFromUri(theFile)) {
-            bytes = new byte[1000];
+            byte[] bytes = new byte[1000];
             int numread = is.read(bytes);
             assertEquals("Congratulations, you found me!" + System.getProperty("line.separator"), new String(bytes, 0, numread, StandardCharsets.UTF_8));
         }

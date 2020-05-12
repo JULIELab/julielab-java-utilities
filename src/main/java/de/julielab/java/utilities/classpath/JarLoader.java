@@ -7,7 +7,12 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -55,25 +60,25 @@ public class JarLoader {
      * Adds the supplied Java Archive library to java.class.path. This is benign
      * if the library is already loaded.
      */
-    public static synchronized void loadLibraryWithURLClassloader(java.io.File jar) throws Exception {
+    public static synchronized void loadLibraryWithURLClassloader(File jar) {
         try {
             /*We are using reflection here to circumvent encapsulation; addURL is not public*/
-            java.net.URLClassLoader loader = (java.net.URLClassLoader) ClassLoader.getSystemClassLoader();
-            java.net.URL url = jar.toURI().toURL();
+            URLClassLoader loader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+            URL url = jar.toURI().toURL();
             /*Disallow if already loaded*/
-            for (java.net.URL it : loader.getURLs()) {
+            for (URL it : loader.getURLs()) {
                 if (it.equals(url)) {
                     return;
                 }
             }
-            java.lang.reflect.Method method = java.net.URLClassLoader.class.getDeclaredMethod("addURL", java.net.URL.class);
+            Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
             method.setAccessible(true); /*promote the method to public access*/
             method.invoke(loader, url);
-        } catch (final java.lang.NoSuchMethodException |
-                java.lang.IllegalAccessException |
-                java.net.MalformedURLException |
-                java.lang.reflect.InvocationTargetException e) {
-            throw new Exception(e);
+        } catch (final NoSuchMethodException |
+                IllegalAccessException |
+                MalformedURLException |
+                InvocationTargetException e) {
+            throw new IllegalStateException(e);
         }
     }
 

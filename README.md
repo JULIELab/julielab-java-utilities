@@ -8,8 +8,7 @@ BEFORE EXTENDING this project, please be (reasonably) sure that the desired func
  another libarary. Candidates to check are
 
 *   [Apache Commons](https://commons.apache.org), check the components on the page
-*   [Google Guava](https://commons.apache.org/proper/commons-lang/), [Java API Docs](http://google.github.io/guava
-/releases/23.0/api/docs/)
+*   [Google Guava](https://commons.apache.org/proper/commons-lang/), [Java API Docs](https://guava.dev/releases/29.0-jre/api/docs/)
 
 Also, please try to keep the dependencies of the project as small as possible. Whenever external libraries are needed
 only for some specific functionality, set the respective dependencies to the `provided` scope and add a respective

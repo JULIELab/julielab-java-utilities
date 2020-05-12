@@ -67,11 +67,16 @@ note to this readme.
 *   This package also offers the `CacheServer` which is a simple HTTP server to encapsulate persistent caches. The main advantage is that multiple clients can then access the same persistent cache. This is not possible otherwise because the cache files can only be opened by a single JVM. When setting remote caching to the `CacheConfiguration` and specifying host and HTTP port, the `CacheAccess` intances returned by the `CacheService` are `RemoteCacheAccess` objects. Otherwise, nothing is different from using local caching.
 ### Span Utilities
 *   **NOTE** requires the dependency `org.apache.commons`:`org.apache.commons`:`3.8.1` for the `Range` class. This dependency is not resolved transitively from this project.
+
 *   Helper classes for objects that cover some kind of integer-valued span
     *   e.g. word spans, character spans, time spans
+    
 *   Particularly useful when span-objects are sought that overlap with a given span.
+
 *   `de.julielab.java.utilities.spanutils.OffsetMap` maps integer ranges to arbitrary objects, e.g. text annotations. It returns a overlapping-range-restricted subset of itself on request and can return contained objects overlapping a given range.
+
 *   `de.julielab.java.utilities.spanutils.OffsetSet` stores a set of ranges and allows to retrieve the first range in the set that overlaps a given range.
+
 *   `de.julielab.java.utilities.spanutils.SpanOffsetSet` this is basically the `OffsetSet` but accepts objects implementing `Span`, allowing for more general objects.
 ### UriUtilities.java
 *   Get InputStreams and Readers from `java.net.URI`

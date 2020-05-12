@@ -18,8 +18,6 @@ public class LocalFileCacheAccess<K, V> extends CacheAccess<K, V> {
     private final static Logger log = LoggerFactory.getLogger(LocalFileCacheAccess.class);
     private final CacheService cacheService;
     private final File cacheFile;
-    private final GroupSerializer<K> keySerializer;
-    private final GroupSerializer<V> valueSerializer;
     private final File cacheDir;
     private Map<K, V> cache;
     private final Map<K, V> persistentCache;
@@ -31,8 +29,8 @@ public class LocalFileCacheAccess<K, V> extends CacheAccess<K, V> {
 
     public LocalFileCacheAccess(String cacheId, String cacheRegion, String keySerializer, String valueSerializer, File cacheDir, CacheMapSettings mapSettings) {
         super(cacheId, cacheRegion);
-        this.keySerializer = getSerializerByName(keySerializer);
-        this.valueSerializer = getSerializerByName(valueSerializer);
+        GroupSerializer<K> keySerializer1 = getSerializerByName(keySerializer);
+        GroupSerializer<V> valueSerializer1 = getSerializerByName(valueSerializer);
         this.cacheDir = cacheDir;
         cacheService = CacheService.getInstance();
         cacheFile = new File(getCacheDir(), cacheId);
@@ -69,9 +67,9 @@ public class LocalFileCacheAccess<K, V> extends CacheAccess<K, V> {
 
         if (usePersistentCache) {
             if (mapSettings.get(MAP_TYPE) == CacheService.CacheMapDataType.HTREE)
-                cache = cacheService.getHTreeCache(cacheFile, cacheRegion, this.keySerializer, this.valueSerializer, mapSettings);
+                cache = cacheService.getHTreeCache(cacheFile, cacheRegion, keySerializer1, valueSerializer1, mapSettings);
             else
-                cache = cacheService.getBTreeCache(cacheFile, cacheRegion, this.keySerializer, this.valueSerializer, mapSettings);
+                cache = cacheService.getBTreeCache(cacheFile, cacheRegion, keySerializer1, valueSerializer1, mapSettings);
         }
 
         persistentCache = cache;
@@ -81,7 +79,7 @@ public class LocalFileCacheAccess<K, V> extends CacheAccess<K, V> {
             CacheMapSettings memCacheSettings = new CacheMapSettings(PERSIST_TYPE, CacheService.CachePersistenceType.MEM, EXPIRE_AFTER_CREATE, true, MAX_SIZE, memCacheSize);
             if (persistentCache != null)
                 memCacheSettings.put(OVERFLOW_DB, cache);
-            cache = cacheService.getHTreeCache(memCacheName, cacheRegion + ".mem", this.keySerializer, this.valueSerializer, memCacheSettings);
+            cache = cacheService.getHTreeCache(memCacheName, cacheRegion + ".mem", keySerializer1, valueSerializer1, memCacheSettings);
             hasMemCache = true;
         }
     }

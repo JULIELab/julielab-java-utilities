@@ -75,11 +75,11 @@ public class CLIInteractionUtilities {
 	 */
 	public static boolean readYesNoFromStdInWithMessage(String message) throws IOException {
 		String response = "";
-		while (!response.equals("y") && !response.equals("yes") && !response.equals("n") && !response.equals("no")) {
+		while (!"y".equals(response) && !"yes".equals(response) && !"n".equals(response) && !"no".equals(response)) {
 			response = readLineFromStdInWithMessage(message + " (y/n)");
 			response = response.toLowerCase();
 		}
-		return response.equals("y") || response.equals("yes");
+		return "y".equals(response) || "yes".equals(response);
 	}
 
 	/**
@@ -101,9 +101,9 @@ public class CLIInteractionUtilities {
 		do {
 			response = readLineFromStdInWithMessage(message + " (y/n)[" + defaultMarker + "]");
 			response = response.toLowerCase();
-		} while (!response.equals("y") && !response.equals("yes") && !response.equals("n") && !response.equals("no")
+		} while (!"y".equals(response) && !"yes".equals(response) && !"n".equals(response) && !"no".equals(response)
 				&& response.trim().length() > 0);
 
-		return response.equals("y") || response.equals("yes") || response.trim().length() == 0;
+		return "y".equals(response) || "yes".equals(response) || !response.trim().isEmpty();
 	}
 }

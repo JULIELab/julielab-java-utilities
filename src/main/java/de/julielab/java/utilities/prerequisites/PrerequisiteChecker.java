@@ -31,9 +31,9 @@ public class PrerequisiteChecker {
     /**
      * Only here to create {@link #DISABLED_CHECKER}
      *
-     * @param enabled Ignored. Internally always set to <code>false</code>.
+     * @param ignored Ignored. Internally always set to <code>false</code>.
      */
-    private PrerequisiteChecker(boolean enabled) {
+    private PrerequisiteChecker(boolean ignored) {
         this.enabled = false;
     }
 

@@ -15,7 +15,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
@@ -104,7 +103,7 @@ public class ConfigurationUtilities {
                             .setEncoding(StandardCharsets.UTF_8.name())
                             .setFile(configurationFile));
             return configBuilder.getConfiguration();
-        } catch (org.apache.commons.configuration2.ex.ConfigurationException e) {
+        } catch (ConfigurationException e) {
             throw new ConfigurationException(e);
         }
     }
@@ -126,7 +125,7 @@ public class ConfigurationUtilities {
         XMLConfiguration c;
         try {
             c = builder.getConfiguration();
-        } catch (org.apache.commons.configuration2.ex.ConfigurationException e) {
+        } catch (ConfigurationException e) {
             throw new ConfigurationException();
         }
         return c;
@@ -146,7 +145,7 @@ public class ConfigurationUtilities {
                         "does not implement the " + FileBased.class.getCanonicalName() + " interface");
             FileHandler fh = new FileHandler((FileBased) configuration);
             fh.save(destination);
-        } catch (org.apache.commons.configuration2.ex.ConfigurationException e) {
+        } catch (ConfigurationException e) {
             throw new ConfigurationException();
         }
     }
@@ -160,7 +159,7 @@ public class ConfigurationUtilities {
      * @return The input keys joined with dots.
      */
     public static String dot(String... keys) {
-        return Stream.of(keys).collect(Collectors.joining("."));
+        return Stream.of(keys).collect(joining("."));
     }
 
     /**
@@ -170,7 +169,7 @@ public class ConfigurationUtilities {
      * @return The input keys joined with slashes for xpath expressions.
      */
     public static String slash(String... keys) {
-        return Stream.of(keys).collect(Collectors.joining("/"));
+        return Stream.of(keys).collect(joining("/"));
     }
 
     /**

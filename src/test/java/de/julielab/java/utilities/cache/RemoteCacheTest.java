@@ -20,7 +20,7 @@ public class RemoteCacheTest {
     private static CacheServer cacheServer;
 
     @BeforeClass
-    public static void setup() throws Exception {
+    public static void setUp() throws Exception {
         String host = "localhost";
         Random random = new Random();
         int port = random.nextInt(1000) + 9000;

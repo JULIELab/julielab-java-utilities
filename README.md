@@ -2,11 +2,15 @@
 A collection of small commonly useful utilities and helpers for Java.
 This project should be extended by other commonly useful classes and methods.
 
+Feel free to add more generally useful libraries here! When you do (and please do!), kindly consider the following:
+
 BEFORE EXTENDING this project, please be (reasonably) sure that the desired functionality is not already contained in another libarary. Candidates to check are
 * [Apache Commons](https://commons.apache.org), check the components on the page
 * [Google Guava](https://commons.apache.org/proper/commons-lang/), [Java API Docs](http://google.github.io/guava/releases/23.0/api/docs/)
 
-Feel free to add more generally useful libraries here!
+Also, please try to keep the dependencies of the project as small as possible. Whenever external libraries are needed
+only for some specific functionality, set the respective dependencies to the `provided` scope and add a respective
+note to this readme. 
 
 ## Classes Overview
 
@@ -48,6 +52,20 @@ Feel free to add more generally useful libraries here!
 * Example: `PrerequisiteChecker.checkThat().notNull(ob1, ob2).notEmpty(coll).withNames("ob1", "ob2", "coll").execute()`
 * Is **deactivated** by default: No checks will be performed unless the Java system property `de.julielab.prerequisitechecksenabled` is set to `true`.
 * Can be used with the `Supplier` interface. This allows to quickly check a path within a given object, e.g. `PrerequisiteChecker.checkThat().notNull(ob).notNull(() -> ob.prop1).notNull(() -> ob.prop1.prop2).withNames("Base object), "Property 1", "Property 2).execute()`
+### cache.*
+* **NOTE** requires the dependency `org.mapdb`:`mapdb`:`3.0.7` for the actual cache implementation. This dependency is not resolved transitively from this project.
+* The `CacheService` is a singleton that is configured once per application. It then offers `CacheAccess` objects for
+ caching.
+* The `CacheService` is configured via a `CacheConfiguration` object. Possible settings include persistent caching
+, cache size, usage of a in-memory cache in addition to persistent caching, read-only access and the usage of remote
+ caching (see the `CachServer` below).
+* The `CacheAccess` objects provide a simple interface to an underlying `MapDB` cache. The ´CacheMapSettings` can be
+ used to pass configuration to the `MapDB` implementation.
+* This package also offers the `CacheServer` which is a simple HTTP server to encapsulate persistent caches. The main
+ advantage is that multiple clients can then access the same persistent cache. This is not possible otherwise because
+ the cache files can only be opened by a single JVM. When setting remote caching to the `CacheConfiguration` and
+ specifying host and HTTP port, the `CacheAccess` intances returned by the `CacheService` are `RemoteCacheAccess
+ ` objects. Otherwise, nothing is different from using local caching.
 ### Span Utilities
 * **NOTE** requires the dependency `org.apache.commons`:`org.apache.commons`:`3.8.1` for the `Range` class. This dependency is not resolved transitively from this project.
 * Helper classes for objects that cover some kind of integer-valued span

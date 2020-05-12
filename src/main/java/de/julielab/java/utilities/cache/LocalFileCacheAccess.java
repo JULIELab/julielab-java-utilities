@@ -1,5 +1,6 @@
 package de.julielab.java.utilities.cache;
 
+import org.jetbrains.annotations.NotNull;
 import org.mapdb.BTreeMap;
 import org.mapdb.HTreeMap;
 import org.mapdb.serializer.GroupSerializer;
@@ -7,7 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.AbstractMap;
 import java.util.Map;
+import java.util.Set;
 
 import static de.julielab.java.utilities.cache.CacheMapSettings.*;
 
@@ -19,7 +22,7 @@ public class LocalFileCacheAccess<K, V> extends CacheAccess<K, V> {
     private final GroupSerializer<V> valueSerializer;
     private final File cacheDir;
     private Map<K, V> cache;
-    private Map<K, V> persistentCache;
+    private final Map<K, V> persistentCache;
     private boolean hasMemCache;
 
     public LocalFileCacheAccess(String cacheId, String cacheRegion, String keySerializer, String valueSerializer, File cacheDir) {
@@ -37,8 +40,32 @@ public class LocalFileCacheAccess<K, V> extends CacheAccess<K, V> {
         boolean usePersistentCache = (boolean) mapSettings.getOrDefault(USE_PERSISTENT_CACHE, true);
         Long memCacheSize = (Long) mapSettings.getOrDefault(MEM_CACHE_SIZE, 0);
 
-        if (!usePersistentCache && memCacheSize == 0)
+        if (!usePersistentCache && memCacheSize == 0) {
             log.warn("Cache {}:{}: The cache settings do not specify the usage of a persistent cache and the in-memory cache is set to size 0 which deactivates it. There is no caching.", cacheId, cacheRegion);
+            // To avoid NPE, the cache is now a Map that does nothing.
+            cache = new AbstractMap<K, V>() {
+                @NotNull
+                @Override
+                public Set<Entry<K, V>> entrySet() {
+                    return null;
+                }
+
+                @Override
+                public V put(K key, V value) {
+                    return null;
+                }
+
+                @Override
+                public void putAll(Map<? extends K, ? extends V> m) {
+                    // Nothing
+                }
+
+                @Override
+                public V get(Object key) {
+                    return null;
+                }
+            };
+        }
 
         if (usePersistentCache) {
             if (mapSettings.get(MAP_TYPE) == CacheService.CacheMapDataType.HTREE)

@@ -40,10 +40,15 @@ note to this readme.
 *   Method to add a file into an existing JAR
 *   Method to find a (file) resource via file path, URI or on the classpath.
 ### JarLoader.java
+
 *   **NOTE** requires the dependency `net.bytebuddy`:`byte-buddy-agent`:`1.7.9` to exist on the classpath. This dependency is not resolved transitively from this project.
+
 *   Allows to load JAR files during runtime
+
 *   Exploits the fact that `the system class loader is an `URIClassLoader` until Java 8
+
 *   Automatically detects Java version to pick the correct JAR loading strategy
+
 *   Beginning with Java 9, uses the `java.lang.instrument` package and employs the Agent class included in this project
     *   Needs to determine the file path of the JAR containing the Agent class
     *   This JAR needs to have a `META-INF/MANIFEST.MF` file with the entry `Agent-Class: de.julielab.java.utilities.classpath.Agent`

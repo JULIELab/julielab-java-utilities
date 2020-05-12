@@ -45,10 +45,10 @@ note to this readme.
 *   Exploits the fact that `the system class loader is an `URIClassLoader` until Java 8
 *   Automatically detects Java version to pick the correct JAR loading strategy
 *   Beginning with Java 9, uses the `java.lang.instrument` package and employs the Agent class included in this project
-  *   Needs to determine the file path of the JAR containing the Agent class
-  *   This JAR needs to have a `META-INF/MANIFEST.MF` file with the entry `Agent-Class: de.julielab.java.utilities.classpath.Agent`
-  *   The `julielab-java-utilities` JAR is searched on the classpath for this purpose.
-  *   In case of an uber JAR or fat JAR (e.g. through the Maven assembly or shadow plugins), the uber JAR itself is pointed to. The uber JAR must then have the manifest entry as explained above.
+    *   Needs to determine the file path of the JAR containing the Agent class
+    *   This JAR needs to have a `META-INF/MANIFEST.MF` file with the entry `Agent-Class: de.julielab.java.utilities.classpath.Agent`
+    *   The `julielab-java-utilities` JAR is searched on the classpath for this purpose.
+    *   In case of an uber JAR or fat JAR (e.g. through the Maven assembly or shadow plugins), the uber JAR itself is pointed to. The uber JAR must then have the manifest entry as explained above.
 ### prerequisites.PrerequisiteChecker
 *   Simple to use API to check parameter values for being not null or not empty. Automatically generates an error report if checks fail via an `IllegalArgumentException.
 *   Example: `PrerequisiteChecker.checkThat().notNull(ob1, ob2).notEmpty(coll).withNames("ob1", "ob2", "coll").execute()`

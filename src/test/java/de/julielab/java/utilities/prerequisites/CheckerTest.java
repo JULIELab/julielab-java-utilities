@@ -7,7 +7,8 @@ import org.junit.Test;
 
 import java.util.*;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 public class CheckerTest {
 

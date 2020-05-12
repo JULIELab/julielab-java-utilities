@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -62,14 +61,14 @@ public class JarLoader {
             java.net.URLClassLoader loader = (java.net.URLClassLoader) ClassLoader.getSystemClassLoader();
             java.net.URL url = jar.toURI().toURL();
             /*Disallow if already loaded*/
-            for (java.net.URL it : java.util.Arrays.asList(loader.getURLs())) {
+            for (java.net.URL it : loader.getURLs()) {
                 if (it.equals(url)) {
                     return;
                 }
             }
-            java.lang.reflect.Method method = java.net.URLClassLoader.class.getDeclaredMethod("addURL", new Class[]{java.net.URL.class});
+            java.lang.reflect.Method method = java.net.URLClassLoader.class.getDeclaredMethod("addURL", java.net.URL.class);
             method.setAccessible(true); /*promote the method to public access*/
-            method.invoke(loader, new Object[]{url});
+            method.invoke(loader, url);
         } catch (final java.lang.NoSuchMethodException |
                 java.lang.IllegalAccessException |
                 java.net.MalformedURLException |
@@ -80,13 +79,9 @@ public class JarLoader {
 
     private static boolean isJavaVersionAbove8() {
         String version = System.getProperty("java.version");
-        if (version.startsWith("1.")) {
-            // Version format up to Java 8, e.g. 1.7.0
-            return false;
-        } else {
-            // Version format beginning at Java 9, the major version stands in front
-            return true;
-        }
+        // Version format up to Java 8, e.g. 1.7.0
+        // Version format beginning at Java 9, the major version stands in front
+        return !version.startsWith("1.");
     }
 
     /**

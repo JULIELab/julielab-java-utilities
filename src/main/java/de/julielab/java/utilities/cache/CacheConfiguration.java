@@ -3,11 +3,11 @@ package de.julielab.java.utilities.cache;
 import java.io.File;
 
 public class CacheConfiguration {
-    private File localCacheDir;
-    private String remoteCacheHost;
-    private int remoteCachePort;
-    private boolean readOnly;
-    private CacheService.CacheType cacheType;
+    private final File localCacheDir;
+    private final String remoteCacheHost;
+    private final int remoteCachePort;
+    private final boolean readOnly;
+    private final CacheService.CacheType cacheType;
 
     public CacheConfiguration(CacheService.CacheType cacheType, File localCacheDir, String remoteCacheHost, int remoteCachePort, boolean readOnly) {
         this.cacheType = cacheType;

@@ -1,7 +1,6 @@
 package de.julielab.java.utilities.prerequisites;
 
 import java.util.Collection;
-import java.util.Optional;
 import java.util.function.Supplier;
 
 public class EmptyChecker extends ParameterChecker {

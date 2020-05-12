@@ -6,9 +6,9 @@ import org.junit.Test;
 
 import java.util.NavigableMap;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.assertj.core.api.Assertions.*;
 public class OffsetMapTest {
 
 	@Test

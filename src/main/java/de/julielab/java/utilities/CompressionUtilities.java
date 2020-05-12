@@ -1,6 +1,9 @@
 package de.julielab.java.utilities;
 
-import org.rauschig.jarchivelib.*;
+import org.rauschig.jarchivelib.ArchiveEntry;
+import org.rauschig.jarchivelib.ArchiveStream;
+import org.rauschig.jarchivelib.Archiver;
+import org.rauschig.jarchivelib.ArchiverFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,7 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
-import java.util.stream.Stream;
 
 /**
  * Utility class to work with compressed files. Note that the dependency for the jarchivelib project

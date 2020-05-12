@@ -1,10 +1,8 @@
 package de.julielab.java.utilities;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 

@@ -1,7 +1,5 @@
 package de.julielab.java.utilities.spanutils;
 
-import org.apache.commons.lang3.Range;
-
 import java.util.Collection;
 import java.util.TreeSet;
 

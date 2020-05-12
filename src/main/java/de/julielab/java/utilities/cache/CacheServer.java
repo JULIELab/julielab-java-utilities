@@ -23,10 +23,10 @@ public class CacheServer {
     public static final String RESPONSE_OK = "OK";
     public static final String RESPONSE_FAILURE = "FAILURE";
     private final static Logger log = LoggerFactory.getLogger(CacheServer.class);
-    private File cacheDir;
-    private String host;
-    private int port;
-    private ExecutorService executorService;
+    private final File cacheDir;
+    private final String host;
+    private final int port;
+    private final ExecutorService executorService;
     private Thread backgroundThread;
 
 
@@ -50,16 +50,13 @@ public class CacheServer {
     }
 
     public void run() throws IOException {
-        final ServerSocket serverSocket = new ServerSocket(port, 1000, InetAddress.getByName(host));
-        try {
+        try (ServerSocket serverSocket = new ServerSocket(port, 1000, InetAddress.getByName(host))) {
             log.info("CacheServer ready for requests.");
             while (true) {
                 final Socket socket = serverSocket.accept();
                 log.debug("Handling new incoming connection");
                 executorService.submit(new RequestServer(socket));
             }
-        } finally {
-            serverSocket.close();
         }
     }
 
@@ -77,7 +74,7 @@ public class CacheServer {
                     try {
                         CacheServer.this.run();
                     } catch (IOException e) {
-                        new RuntimeException(e);
+                        throw new RuntimeException(e);
                     }
                 }
             };
@@ -98,7 +95,7 @@ public class CacheServer {
     }
 
     private class RequestServer extends Thread {
-        private Socket socket;
+        private final Socket socket;
 
         public RequestServer(Socket socket) {
             this.socket = socket;
@@ -162,14 +159,12 @@ public class CacheServer {
                         }
                     } catch (Throwable e) {
                         log.error("Exception occurred. Sending an error message to the client and terminating the connection.", e);
-                        if (oos != null) {
-                            try {
-                                oos.writeUTF(RESPONSE_FAILURE);
-                                oos.writeObject(e);
-                                oos.flush();
-                            } catch (IOException e1) {
-                                // OK, so we couldn't even send the error ignore it
-                            }
+                        try {
+                            oos.writeUTF(RESPONSE_FAILURE);
+                            oos.writeObject(e);
+                            oos.flush();
+                        } catch (IOException e1) {
+                            // OK, so we couldn't even send the error ignore it
                         }
                         oos.close();
                         ois.close();

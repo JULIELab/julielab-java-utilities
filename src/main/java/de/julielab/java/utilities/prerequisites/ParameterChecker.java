@@ -1,6 +1,9 @@
 package de.julielab.java.utilities.prerequisites;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Queue;
 
 /**
  * Abstract class for checks of items that will most probably method or configuration parameters. Extending

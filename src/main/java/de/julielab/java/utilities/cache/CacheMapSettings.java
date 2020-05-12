@@ -39,8 +39,7 @@ public class CacheMapSettings extends HashMap<String, Object> {
                 String key = (String) settings[i - 1];
                 Object value = settings[i];
                 if (value instanceof Integer && (key.equals(MEM_CACHE_SIZE) || key.equals(MAX_SIZE) || key.equals(MAX_STORE_SIZE) || key.equals(EXPIRE_AFTER_CREATE) || key.equals(EXPIRE_AFTER_GET) || key.equals(EXPIRE_AFTER_UPDATE) || key.equals(EXPIRE_EXECUTOR_PERIOD))) {
-                    int intVal = (int) value;
-                    long longVal = intVal;
+                    long longVal = (int) value;
                     value = longVal;
                 }
                 put(key, value);

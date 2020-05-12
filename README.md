@@ -64,7 +64,7 @@ note to this readme.
 ### Span Utilities
 *   **NOTE** requires the dependency `org.apache.commons`:`org.apache.commons`:`3.8.1` for the `Range` class. This dependency is not resolved transitively from this project.
 *   Helper classes for objects that cover some kind of integer-valued span
-    *   e.g. word spans, character spans, time spans
+       *   e.g. word spans, character spans, time spans
 *   Particularly useful when span-objects are sought that overlap with a given span.
 *   `de.julielab.java.utilities.spanutils.OffsetMap` maps integer ranges to arbitrary objects, e.g. text annotations. It returns a overlapping-range-restricted subset of itself on request and can return contained objects overlapping a given range.
 *   `de.julielab.java.utilities.spanutils.OffsetSet` stores a set of ranges and allows to retrieve the first range in the set that overlaps a given range.

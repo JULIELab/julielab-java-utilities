@@ -28,10 +28,10 @@ public class CacheService {
     public static final String CACHING_ENABLED_PROP = "de.julielab.java.utilities.cache.enabled";
     private final static Logger log = LoggerFactory.getLogger(CacheService.class);
     private static CacheService service;
-    private Map<String, DB> dbs = new HashMap<>();
-    private Set<String> readOnly = new HashSet<>();
-    private CacheConfiguration configuration;
-    private List<CacheAccess<?, ?>> cacheAccesses = new ArrayList<>();
+    private final Map<String, DB> dbs = new HashMap<>();
+    private final Set<String> readOnly = new HashSet<>();
+    private final CacheConfiguration configuration;
+    private final List<CacheAccess<?, ?>> cacheAccesses = new ArrayList<>();
 
     private CacheService(CacheConfiguration configuration) {
         this.configuration = configuration;
@@ -103,7 +103,9 @@ public class CacheService {
             default:
                 throw new IllegalArgumentException("Unknown cache type '" + configuration.getCacheType() + "' in the configuration.");
         }
-        cacheAccesses.add(ret);
+        synchronized (cacheAccesses) {
+            cacheAccesses.add(ret);
+        }
         return ret;
     }
 
@@ -122,7 +124,9 @@ public class CacheService {
             default:
                 throw new IllegalArgumentException("Unknown cache type '" + configuration.getCacheType() + "' in the configuration.");
         }
-        cacheAccesses.add(ret);
+        synchronized (cacheAccesses) {
+            cacheAccesses.add(ret);
+        }
         return ret;
     }
 
@@ -239,7 +243,9 @@ public class CacheService {
 
     public void commitAllCaches() {
         // We issue commit commands to all the cache accesses that
-        cacheAccesses.stream().filter(ca -> !ca.isClosed()).forEach(CacheAccess::commit);
+        synchronized (cacheAccesses) {
+            cacheAccesses.stream().filter(ca -> !ca.isClosed()).forEach(CacheAccess::commit);
+        }
     }
 
     private DB getFiledb(File cacheDir, boolean transactionsSupported) {
@@ -248,7 +254,7 @@ public class CacheService {
             if (db == null || db.isClosed() || db.getStore().isClosed()) {
                 DBMaker.Maker dbmaker;
                 synchronized (this) {
-                    if (!dbs.containsKey(cacheDir.getCanonicalPath()) || db.isClosed() || db.getStore().isClosed()) {
+                    if (!dbs.containsKey(cacheDir.getCanonicalPath()) || (db != null && (db.isClosed() || db.getStore().isClosed()))) {
                         dbmaker = DBMaker
                                 .fileDB(cacheDir.getAbsolutePath())
                                 .fileMmapEnable()

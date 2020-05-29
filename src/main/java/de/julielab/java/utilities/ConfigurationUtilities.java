@@ -194,10 +194,10 @@ public class ConfigurationUtilities {
     }
 
     /**
-     * <p>Creates expressions in the form <tt>[attr='value']</tt> to be used in predicate XPath expressions.</p>
+     * <p>Creates expressions in the form <tt>[@attr='value']</tt> to be used in predicate XPath expressions.</p>
      *
      * @param attribute The attribute name.
-     * @param value The value to check the attribute for.
+     * @param value     The value to check the attribute for.
      * @return The XPath predicate expression.
      * @see #attrEqMultiPred(String, String...)
      */
@@ -206,7 +206,7 @@ public class ConfigurationUtilities {
     }
 
     /**
-     * <p>Creates expressions in the form <tt>element[attr='value' AND attr2='value2']</tt> to be used in predicate XPath expressions.</p>
+     * <p>Creates expressions in the form <tt>element[@attr='value' AND @attr2='value2']</tt> to be used in predicate XPath expressions.</p>
      * <p>Results in the selection of elements fulfulling the specified predicate.</p>
      *
      * @param element             The name of element to apply the predicate to.
@@ -219,7 +219,7 @@ public class ConfigurationUtilities {
     }
 
     /**
-     * <p>Creates expressions in the form <tt>element[attr='value']</tt> to be used in predicate XPath expressions.</p>
+     * <p>Creates expressions in the form <tt>element[@attr='value']</tt> to be used in predicate XPath expressions.</p>
      *
      * @param element
      * @param attribute The attribute name.
@@ -232,7 +232,7 @@ public class ConfigurationUtilities {
     }
 
     /**
-     * <p>Creates expressions in the form <tt>[attr='value' AND attr2='value2']</tt> to be used in predicate XPath expressions.</p>
+     * <p>Creates expressions in the form <tt>[@attr='value' AND @attr2='value2']</tt> to be used in predicate XPath expressions.</p>
      *
      * @param operator            'and' or 'or', case sensitive.
      * @param attributesAndValues A sequence of attribute names and the values they are matched against, beginning with an attribute name.
@@ -256,7 +256,7 @@ public class ConfigurationUtilities {
     }
 
     /**
-     * Creates the string <tt>attr='value'</tt> to be used in a predicate. Note that this is not yet an XPath
+     * Creates the string <tt>@attr='value'</tt> to be used in a predicate. Note that this is not yet an XPath
      * predicate expression due to the missing parenthesis.
      *
      * @param attribute The attribute.
@@ -266,6 +266,6 @@ public class ConfigurationUtilities {
      * @see #attrEqMultiPred(String, String...)
      */
     public static String attrEq(String attribute, String value) {
-        return attribute + "='" + value + "'";
+        return "@" + attribute + "='" + value + "'";
     }
 }

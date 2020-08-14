@@ -2,6 +2,7 @@ package de.julielab.java.utilities.spanutils;
 
 import org.apache.commons.lang3.Range;
 
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.SortedMap;
@@ -9,10 +10,26 @@ import java.util.TreeMap;
 
 public class OffsetMap<V> extends TreeMap<Range<Integer>, V> {
 
-	private final static OffsetMap<?> EMPTY_OFFSET_MAP = new OffsetMap<>();
-	
+	private final static OffsetMap<?> EMPTY_OFFSET_MAP = new OffsetMap() {
+		public Object put(Range<Integer> key, Object value) {
+			throw new UnsupportedOperationException();
+		}
+
+		public Object remove(Object key) {
+			throw new UnsupportedOperationException();
+		}
+
+		public void putAll(Map m) {
+			throw new UnsupportedOperationException();
+		}
+
+		public void clear() {
+			throw new UnsupportedOperationException();
+		}
+	};
+
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 8336911838492274123L;
 

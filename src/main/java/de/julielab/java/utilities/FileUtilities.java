@@ -50,16 +50,30 @@ public class FileUtilities {
      * an {@link BufferedOutputStream} and also in an {@link GZIPOutputStream}
      * if the file name ends with .gz or .gzip.
      *
+     * @param file   The file to write.
+     * @param append Whether to append to the file.
+     * @return A buffered output stream.
+     * @throws IOException If there is an error during stream creation.
+     */
+    public static BufferedOutputStream getOutputStreamToFile(File file, boolean append) throws IOException {
+        OutputStream os = new FileOutputStream(file, append);
+        String lcfn = file.getName().toLowerCase();
+        if (lcfn.contains(".gz") || lcfn.contains(".gzip"))
+            os = new GZIPOutputStream(os);
+        return new BufferedOutputStream(os);
+    }
+
+    /**
+     * Returns an {@link OutputStream} for <tt>file</tt>. Automatically wraps in
+     * an {@link BufferedOutputStream} and also in an {@link GZIPOutputStream}
+     * if the file name ends with .gz or .gzip.
+     *
      * @param file The file to write.
      * @return A buffered output stream.
      * @throws IOException If there is an error during stream creation.
      */
     public static BufferedOutputStream getOutputStreamToFile(File file) throws IOException {
-        OutputStream os = new FileOutputStream(file);
-        String lcfn = file.getName().toLowerCase();
-        if (lcfn.contains(".gz") || lcfn.contains(".gzip"))
-            os = new GZIPOutputStream(os);
-        return new BufferedOutputStream(os);
+        return getOutputStreamToFile(file, false);
     }
 
     /**
@@ -79,12 +93,25 @@ public class FileUtilities {
      * Returns a writer to the file <tt>file</tt> where the destination file may
      * will be gzipped if <tt>file</tt> has the extension .gz or .gzip.
      *
+     * @param file   The file to write.
+     * @param append Whether to append to the file.
+     * @return A writer for <tt>file</tt>.
+     * @throws IOException If opening the file fails.
+     */
+    public static BufferedWriter getWriterToFile(File file, boolean append) throws IOException {
+        return new BufferedWriter(new OutputStreamWriter(getOutputStreamToFile(file, append), StandardCharsets.UTF_8));
+    }
+
+    /**
+     * Returns a writer to the file <tt>file</tt> where the destination file may
+     * will be gzipped if <tt>file</tt> has the extension .gz or .gzip.
+     *
      * @param file The file to write.
      * @return A writer for <tt>file</tt>.
      * @throws IOException If opening the file fails.
      */
     public static BufferedWriter getWriterToFile(File file) throws IOException {
-        return new BufferedWriter(new OutputStreamWriter(getOutputStreamToFile(file), StandardCharsets.UTF_8));
+        return new BufferedWriter(new OutputStreamWriter(getOutputStreamToFile(file, false), StandardCharsets.UTF_8));
     }
 
     /**

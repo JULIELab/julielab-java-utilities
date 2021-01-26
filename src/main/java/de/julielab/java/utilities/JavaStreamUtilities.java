@@ -12,7 +12,7 @@ public class JavaStreamUtilities {
      * @param <E>           The value type for comparison.
      * @return The predicate.
      */
-    public static <T, E> Predicate equalsFirstSeenValue(Function<T, E> valueFunction) {
+    public static <T, E> Predicate<T> equalsFirstSeenValue(Function<T, E> valueFunction) {
         return new Predicate<T>() {
             private E firstValue = null;
 

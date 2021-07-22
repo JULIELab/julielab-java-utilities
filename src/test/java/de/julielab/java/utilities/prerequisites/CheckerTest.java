@@ -1,9 +1,9 @@
 package de.julielab.java.utilities.prerequisites;
 
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
@@ -12,12 +12,12 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 
 public class CheckerTest {
 
-    @BeforeClass
+    @BeforeAll
     public static void setup() {
         System.setProperty(PrerequisiteChecker.PREREQUISITE_CHECKS_ENABLED, "true");
     }
 
-    @AfterClass
+    @AfterAll
     public static void shutdown() {
         System.setProperty(PrerequisiteChecker.PREREQUISITE_CHECKS_ENABLED, "false");
     }

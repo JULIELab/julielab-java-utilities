@@ -1,17 +1,18 @@
 package de.julielab.java.utilities.cache;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
+
 
 public class LocalCacheTest {
-    @BeforeClass
+    @BeforeAll
     public static void setup() {
         File cacheDir = new File("src/test/resources/localcachetest");
         CacheService.initialize(new CacheConfiguration(CacheService.CacheType.LOCAL, cacheDir, null, 0, false));

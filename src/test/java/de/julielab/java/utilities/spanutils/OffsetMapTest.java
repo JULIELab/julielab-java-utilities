@@ -2,21 +2,22 @@
 package de.julielab.java.utilities.spanutils;
 
 import org.apache.commons.lang3.Range;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.NavigableMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
 public class OffsetMapTest {
 
-	@Test
-	public void testGetOverlapping() {
-		OffsetMap<String> map = new OffsetMap<>();
-		map.put(Range.between(5, 10), "first");
-		map.put(Range.between(11, 15), "middle");
-		map.put(Range.between(16, 20), "last");
+    @Test
+    public void testGetOverlapping() {
+        OffsetMap<String> map = new OffsetMap<>();
+        map.put(Range.between(5, 10), "first");
+        map.put(Range.between(11, 15), "middle");
+        map.put(Range.between(16, 20), "last");
 
 		assertEquals("first", map.getOverlapping(Range.between(5, 10)).values().stream().findFirst().get());
 		assertEquals("middle", map.getOverlapping(Range.between(10, 14)).values().stream().findFirst().get());

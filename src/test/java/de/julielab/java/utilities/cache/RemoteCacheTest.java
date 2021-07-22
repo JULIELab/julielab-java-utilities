@@ -1,9 +1,9 @@
 package de.julielab.java.utilities.cache;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +19,7 @@ public class RemoteCacheTest {
     private final static Logger log = LoggerFactory.getLogger(RemoteCacheTest.class);
     private static CacheServer cacheServer;
 
-    @BeforeClass
+    @BeforeAll
     public static void setUp() throws Exception {
         String host = "localhost";
         Random random = new Random();
@@ -37,7 +37,7 @@ public class RemoteCacheTest {
         cacheServer.runInBackground();
     }
 
-    @AfterClass
+    @AfterAll
     public static void shutdown() {
         cacheServer.shutdown();
     }

@@ -1,6 +1,7 @@
 package de.julielab.java.utilities;
 
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -10,7 +11,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 
 public class UriUtilitiesTest {
 

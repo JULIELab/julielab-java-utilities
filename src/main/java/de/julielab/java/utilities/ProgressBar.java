@@ -2,9 +2,9 @@ package de.julielab.java.utilities;
 
 public class ProgressBar {
     private final long total;
+    private final long startTime = System.nanoTime();
     private long done;
     private int linewidth = 80;
-    private final long startTime = System.nanoTime();
     private boolean showTime = false;
     private long elapsedTime = 0;
 
@@ -98,7 +98,11 @@ public class ProgressBar {
         }
         if (showTime) {
             double elapsedSeconds = elapsedTime / Math.pow(10, 9);
-            sb.append(" (").append((long) elapsedSeconds).append("s,").append(" ").append(String.format("%.3f", elapsedSeconds / done)).append("s per item").append(")");
+            double avgTime = elapsedSeconds / done;
+            sb.append(" (").append((long) elapsedSeconds).append("s,").append(" ").append(String.format("%.3f", avgTime));
+            if (total > 0)
+                sb.append("s per item, estimated ETA ").append(avgTime * total).append("s");
+            sb.append(")");
         }
         sb.append("\r");
         System.out.print(sb);

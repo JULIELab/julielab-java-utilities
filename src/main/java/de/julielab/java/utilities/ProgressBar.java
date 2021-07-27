@@ -99,9 +99,9 @@ public class ProgressBar {
         if (showTime) {
             double elapsedSeconds = elapsedTime / Math.pow(10, 9);
             double avgTime = elapsedSeconds / done;
-            sb.append(" (").append((long) elapsedSeconds).append("s,").append(" ").append(String.format("%.3f", avgTime)).append("s per item");
+            sb.append(" (").append((long) elapsedSeconds).append("s elapsed,").append(" ").append(String.format("%.3f", avgTime)).append("s per item");
             if (total > 0)
-                sb.append(", estimated ETA ").append((long) (avgTime * total - elapsedSeconds)).append("s");
+                sb.append(", ETA ").append((long) (avgTime * total - elapsedSeconds)).append("s");
             sb.append(")");
         }
         sb.append("\r");

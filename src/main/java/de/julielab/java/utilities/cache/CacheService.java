@@ -50,9 +50,20 @@ public class CacheService {
     }
 
     public synchronized static void initialize(CacheConfiguration configuration) {
-        if (service == null)
-            service = new CacheService(configuration);
+        if (service != null) {
+            throw new IllegalStateException("The cache service has already been initialized. Shut it down first before reconfiguring it.");
+        }
+        service = new CacheService(configuration);
+    }
 
+    public static void shutdown() {
+        service.commitAllCaches();
+        service.close();
+        service = null;
+    }
+
+    public void close() {
+        dbs.values().forEach(db -> db.close());
     }
 
     /**

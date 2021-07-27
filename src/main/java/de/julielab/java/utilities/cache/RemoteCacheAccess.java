@@ -21,7 +21,7 @@ public class RemoteCacheAccess<K, V> extends CacheAccess<K, V> {
     private ObjectOutputStream oos;
     private ObjectInputStream ois;
     private boolean connectionOpen = false;
-    private Cache<K, V> memCache;
+    private final Cache<K, V> memCache;
 
     public RemoteCacheAccess(String cacheId, String cacheRegion, String keySerializer, String valueSerializer, String host, int port) {
         this(cacheId, cacheRegion, keySerializer, valueSerializer, host, port, 100);
@@ -92,9 +92,6 @@ public class RemoteCacheAccess<K, V> extends CacheAccess<K, V> {
     }
 
     private void writeDefaultInformation(String method, K key, ObjectOutputStream oos) throws IOException {
-        if (key == null)
-            throw new IllegalArgumentException("The cache key is null.");
-
         oos.writeUTF(method);
         oos.writeUTF(cacheId);
         oos.writeUTF(cacheRegion);

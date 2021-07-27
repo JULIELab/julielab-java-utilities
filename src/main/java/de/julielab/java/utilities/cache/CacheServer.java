@@ -88,7 +88,7 @@ public class CacheServer {
 
     public void shutdown() {
         log.info("Shutting down cache server.");
-        CacheService.getInstance().commitAllCaches();
+        CacheService.shutdown();
         if (backgroundThread != null)
             backgroundThread.interrupt();
         executorService.shutdown();

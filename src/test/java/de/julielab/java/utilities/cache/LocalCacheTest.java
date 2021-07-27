@@ -1,6 +1,7 @@
 package de.julielab.java.utilities.cache;
 
 import org.apache.commons.io.FileUtils;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -18,6 +19,11 @@ public class LocalCacheTest {
         CacheService.initialize(new CacheConfiguration(CacheService.CacheType.LOCAL, cacheDir, null, 0, false));
         if (cacheDir.exists())
             FileUtils.deleteQuietly(cacheDir);
+    }
+
+    @AfterAll
+    public static void shutdown() {
+        CacheService.shutdown();
     }
 
     @Test

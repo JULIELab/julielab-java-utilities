@@ -7,28 +7,177 @@ Feel free to add more generally useful libraries here! When you do (and please d
 BEFORE EXTENDING this project, please be (reasonably) sure that the desired functionality is not already contained in
  another libarary. Candidates to check are
 
-*   [Apache Commons](https://commons.apache.org), check the components on the page
-*   [Google Guava](https://commons.apache.org/proper/commons-lang/), [Java API Docs](https://guava.dev/releases/29.0-jre/api/docs/)
+* [Apache Commons](https://commons.apache.org)
+  ,
+  check
+  the
+  components
+  on
+  the
+  page
+* [Google Guava](https://commons.apache.org/proper/commons-lang/)
+  , [Java API Docs](https://guava.dev/releases/29.0-jre/api/docs/)
 
-Also, please try to keep the dependencies of the project as small as possible. Whenever external libraries are needed
-only for some specific functionality, set the respective dependencies to the `provided` scope and add a respective
-note to this readme. 
+Also,
+please
+try
+to
+keep
+the
+dependencies
+of
+the
+project
+as
+small
+as
+possible.
+Whenever
+external
+libraries
+are
+needed
+only
+for
+some
+specific
+functionality,
+set
+the
+respective
+dependencies
+to
+the `provided`
+scope
+and
+add
+a
+respective
+note
+to
+this
+readme.
 
 ## Classes Overview
 
 ### CLIInteractionUtilities.java
-*   Helper methods to read from the command line
-*   With a message to print or without
-*   Restricted to boolean yes/no answers.
+
+*
+Helper
+methods
+to
+read
+from
+the
+command
+line
+*
+With
+a
+message
+to
+print
+or
+without
+*
+Restricted
+to
+boolean
+yes/no
+answers.
+
+### Color.java
+
+*
+A
+few
+ANSI
+color
+code
+constants.
+
 ### CompressionUtilities.java
-*   **NOTE**: requires the dependency `org.rauschig`:`jarchivelib`:`0.7.1` to exist on the classpath. This dependency is not resolved transitively from this project.
-*   has a method to extract archive files with automatic archive format determination
+
+* **
+  NOTE**:
+  requires
+  the
+  dependency `org.rauschig`:`jarchivelib`:`0.7.1`
+  to
+  exist
+  on
+  the
+  classpath.
+  This
+  dependency
+  is
+  not
+  resolved
+  transitively
+  from
+  this
+  project.
+*
+has
+a
+method
+to
+extract
+archive
+files
+with
+automatic
+archive
+format
+determination
+
 ### ConfigurationUtilities.java
-*   **NOTE**: requires the dependency `org.apache.commons`:`commons-configuration2`:`2.2`, `commons-beanutils`:`commons-beanutils`:`1.9.3` and `commons-jxpath`:`commons-jxpath`:`1.3` to exist on the classpath. This dependency is not resolved transitively from this project.
-*   Helper methods for the apache commons configuration 2 project
-*   configuration parameter checking
-*   configuration parameter path creation
-*   configuration file reading
+
+* **
+  NOTE**:
+  requires
+  the
+  dependency `org.apache.commons`:`commons-configuration2`:`2.2`
+  , `commons-beanutils`:`commons-beanutils`:`1.9.3`
+  and `commons-jxpath`:`commons-jxpath`:`1.3`
+  to
+  exist
+  on
+  the
+  classpath.
+  This
+  dependency
+  is
+  not
+  resolved
+  transitively
+  from
+  this
+  project.
+*
+Helper
+methods
+for
+the
+apache
+commons
+configuration
+2
+project
+*
+configuration
+parameter
+checking
+*
+configuration
+parameter
+path
+creation
+*
+configuration
+file
+reading
+
 ### IOStreamUtilities
 *   Method to get a UTF-8 encoded reader from an InputStream
 *   Method to get a list of UTF-8 encoded lines from an InputStream

@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>julielab-java-utilities</artifactId>
     <packaging>jar</packaging>
-    <version>1.4.3</version>
+    <version>1.4.4</version>
     <name>julielab-java-utilities</name>
     <url>http://maven.apache.org</url>
     <dependencies>

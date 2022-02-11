@@ -1,5 +1,7 @@
 package de.julielab.java.utilities;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.rauschig.jarchivelib.ArchiveEntry;
 import org.rauschig.jarchivelib.ArchiveStream;
 import org.rauschig.jarchivelib.Archiver;
@@ -53,12 +55,13 @@ public class CompressionUtilities {
         return firstEntryFile;
     }
 
-    public static Iterator<InputStream> getArchiveEntryInputStreams(File archive) throws IOException {
+    public static Iterator<Pair<ArchiveEntry, InputStream>> getArchiveEntryInputStreams(File archive) throws IOException {
         final Archiver archiver = ArchiverFactory.createArchiver(archive);
         final ArchiveStream stream = archiver.stream(archive);
-        return new Iterator<InputStream>() {
-            private ArchiveEntry currentEntry;
+        return new Iterator<Pair<ArchiveEntry, InputStream>>() {
             boolean exhausted = false;
+            private ArchiveEntry currentEntry;
+
             @Override
             public boolean hasNext() {
                 if (currentEntry == null && !exhausted) {
@@ -76,14 +79,35 @@ public class CompressionUtilities {
             }
 
             @Override
-            public InputStream next() {
+            public Pair<ArchiveEntry, InputStream> next() {
                 if (hasNext()) {
+                    Pair<ArchiveEntry, InputStream> ret = new ImmutablePair<>(currentEntry, new LimitedInputStream(currentEntry.getSize(), stream));
                     currentEntry = null;
-                    return stream;
+                    return ret;
                 }
 
                 return null;
             }
         };
+    }
+
+    private static class LimitedInputStream extends InputStream {
+        private final InputStream is;
+        private long limit;
+
+        public LimitedInputStream(long limit, InputStream is) {
+            this.limit = limit;
+            this.is = is;
+        }
+
+        @Override
+        public int read() throws IOException {
+            int data = -1;
+            if (limit > 0)
+                data = is.read();
+            if (data >= 0)
+                --limit;
+            return data;
+        }
     }
 }

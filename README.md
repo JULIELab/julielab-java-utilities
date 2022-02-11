@@ -99,20 +99,20 @@ constants.
 ### CompressionUtilities.java
 
 * **
-  NOTE**:
-  requires
-  the
-  dependency `org.rauschig`:`jarchivelib`:`0.7.1`
-  to
-  exist
-  on
-  the
-  classpath.
-  This
-  dependency
-  is
-  not
-  resolved
+NOTE**:
+requires
+the
+dependency `org.rauschig`:`jarchivelib`:`1.2.0`
+to
+exist
+on
+the
+classpath.
+This
+dependency
+is
+not
+resolved
   transitively
   from
   this

@@ -96,7 +96,7 @@ public class CLIInteractionUtilities {
 	 *             If reading the line fails.
 	 */
 	public static boolean readYesNoFromStdInWithMessage(String message, boolean defaultResponse) throws IOException {
-		String response = "";
+		String response;
 		String defaultMarker = defaultResponse ? "y" : "n";
 		do {
 			response = readLineFromStdInWithMessage(message + " (y/n)[" + defaultMarker + "]");
@@ -104,6 +104,6 @@ public class CLIInteractionUtilities {
 		} while (!"y".equals(response) && !"yes".equals(response) && !"n".equals(response) && !"no".equals(response)
 				&& response.trim().length() > 0);
 
-		return "y".equals(response) || "yes".equals(response) || !response.trim().isEmpty();
+		return "y".equals(response) || "yes".equals(response) || (response.trim().isEmpty() && defaultResponse);
 	}
 }

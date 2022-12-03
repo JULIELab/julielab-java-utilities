@@ -16,7 +16,8 @@ BEFORE EXTENDING this project, please be (reasonably) sure that the desired func
   the
   page
 * [Google Guava](https://commons.apache.org/proper/commons-lang/)
-  , [Java API Docs](https://guava.dev/releases/29.0-jre/api/docs/)
+  ,
+* [Java API Docs](https://guava.dev/releases/29.0-jre/api/docs/)
 
 Also,
 please
@@ -99,20 +100,20 @@ constants.
 ### CompressionUtilities.java
 
 * **
-NOTE**:
-requires
-the
-dependency `org.rauschig`:`jarchivelib`:`1.2.0`
-to
-exist
-on
-the
-classpath.
-This
-dependency
-is
-not
-resolved
+  NOTE**:
+  requires
+  the
+  dependency `org.rauschig`:`jarchivelib`:`1.2.0`
+  to
+  exist
+  on
+  the
+  classpath.
+  This
+  dependency
+  is
+  not
+  resolved
   transitively
   from
   this
@@ -209,11 +210,207 @@ reading
 *   Is **deactivated** by default: No checks will be performed unless the Java system property `de.julielab.prerequisitechecksenabled` is set to `true`.
 *   Can be used with the `Supplier` interface. This allows to quickly check a path within a given object, e.g. `PrerequisiteChecker.checkThat().notNull(ob).notNull(() -> ob.prop1).notNull(() -> ob.prop1.prop2).withNames("Base object), "Property 1", "Property 2).execute()`
 ### cache.*
-*   **NOTE** requires the dependency `org.mapdb`:`mapdb`:`3.0.7` for the actual cache implementation. This dependency is not resolved transitively from this project.
-*   The `CacheService` is a singleton that is configured once per application. It then offers `CacheAccess` objects for caching.
-*   The `CacheService` is configured via a `CacheConfiguration` object. Possible settings include persistent caching, cache size, usage of a in-memory cache in addition to persistent caching, read-only access and the usage of remote caching (see the `CachServer` below).
-*   The `CacheAccess` objects provide a simple interface to an underlying `MapDB` cache. The ´CacheMapSettings` can be used to pass configuration to the `MapDB` implementation.
-*   This package also offers the `CacheServer` which is a simple HTTP server to encapsulate persistent caches. The main advantage is that multiple clients can then access the same persistent cache. This is not possible otherwise because the cache files can only be opened by a single JVM. When setting remote caching to the `CacheConfiguration` and specifying host and HTTP port, the `CacheAccess` intances returned by the `CacheService` are `RemoteCacheAccess` objects. Otherwise, nothing is different from using local caching.
+
+* **
+  NOTE**
+  requires
+  the
+  dependency `org.mapdb`:`mapdb`:`3.0.7`
+  for
+  the
+  actual
+  cache
+  implementation.
+  This
+  dependency
+  is
+  not
+  resolved
+  transitively
+  from
+  this
+  project.
+*
+The `CacheService`
+is
+a
+singleton
+that
+is
+configured
+once
+per
+application.
+It
+then
+offers `CacheAccess`
+objects
+for
+caching.
+*
+The `CacheService`
+is
+configured
+via
+a `CacheConfiguration`
+object.
+Possible
+settings
+include
+persistent
+caching,
+cache
+size,
+usage
+of
+a
+in-memory
+cache
+in
+addition
+to
+persistent
+caching,
+read-only
+access
+and
+the
+usage
+of
+remote
+caching (
+see
+the `CachServer`
+below)
+.
+*
+The `CacheAccess`
+objects
+provide
+a
+simple
+interface
+to
+an
+underlying `MapDB`
+cache.
+The
+´CacheMapSettings` can be used to pass configuration to the `
+MapDB`
+implementation.
+*
+This
+package
+also
+offers
+the `CacheServer`
+which
+is
+a
+simple
+HTTP
+server
+to
+encapsulate
+persistent
+caches.
+The
+main
+advantage
+is
+that
+multiple
+clients
+can
+then
+access
+the
+same
+persistent
+cache.
+This
+is
+not
+possible
+otherwise
+because
+the
+cache
+files
+can
+only
+be
+opened
+by
+a
+single
+JVM.
+When
+setting
+remote
+caching
+to
+the `CacheConfiguration`
+and
+specifying
+host
+and
+HTTP
+port,
+the `CacheAccess`
+intances
+returned
+by
+the `CacheService`
+are `RemoteCacheAccess`
+objects.
+Otherwise,
+nothing
+is
+different
+from
+using
+local
+caching.
+* ### index.** **
+  NOTE** requires the dependency `org.apache.lucene`:`lucene-core`:`8.9.0` `commons-io`:`commons-io`:`2.7` for the actual index implementation. This dependency is not resolved transitively from this project.
+*
+Useful
+when
+a
+large
+map
+is
+required
+that
+exceeds
+memory
+availability
+*
+Indexes
+keys
+and
+values
+in
+map-fashion
+into
+a
+Lucene
+index
+*
+Offers
+simple
+methods
+for
+retrieval
+*
+Offers
+in-memory
+Guava
+caching
+for
+speedup
+
 ### Span Utilities
 *   **NOTE** requires the dependency `org.apache.commons`:`org.apache.commons`:`3.8.1` for the `Range` class. This dependency is not resolved transitively from this project.
 
